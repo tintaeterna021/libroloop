@@ -1,25 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 export default function Home() {
-  const router = useRouter()
-  const [checking, setChecking] = useState(true)
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        router.replace('/catalogo')
-      } else {
-        setChecking(false)
-      }
-    })
-  }, [router])
-
-  if (checking) return null // brief flash while checking auth
   return (
     <div style={{ backgroundColor: '#F5F2E7', minHeight: '100vh' }}>
 
@@ -86,7 +69,7 @@ export default function Home() {
             marginBottom: '2rem',
             textShadow: '0 1px 6px rgba(0,0,0,0.3)',
           }}>
-            Dale una segunda vida a tu biblioteca.
+            Pide en línea y recibe en casa.
           </p>
 
           {/* CTA Buttons */}
@@ -107,25 +90,6 @@ export default function Home() {
               }}
             >
               Ver Catálogo
-            </Link>
-
-            <Link
-              href="/vender"
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.15)',
-                color: 'white',
-                border: '2px solid rgba(255,255,255,0.75)',
-                borderRadius: '999px',
-                padding: '0.85rem 2rem',
-                fontFamily: "'Montserrat', sans-serif",
-                fontWeight: 700,
-                fontSize: '0.95rem',
-                textDecoration: 'none',
-                backdropFilter: 'blur(4px)',
-                transition: 'background-color 0.2s',
-              }}
-            >
-              Quiero Vender
             </Link>
           </div>
         </div>

@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
-import CartSidebar from "@/components/CartSidebar";
 import SiteFooter from "@/components/SiteFooter";
-import { CartProvider } from "@/lib/CartContext";
 
 export const metadata: Metadata = {
-  title: "Libroloop - Compra y Vende Libros",
-  description: "El marketplace de libros de segunda mano más grande. Encuentra tu próxima lectura o vende tus libros.",
+  title: "Libroloop - Compra de Libros",
+  description: "El marketplace de libros de segunda mano más grande. Encuentra tu próxima lectura.",
 };
 
 export default function RootLayout({
@@ -26,14 +24,11 @@ export default function RootLayout({
         />
       </head>
       <body style={{ backgroundColor: '#F5F2E7', fontFamily: "'Montserrat', sans-serif" }}>
-        <CartProvider>
-          <Navigation />
-          <div style={{ minHeight: 'calc(100vh - 200px)' }}>
-            {children}
-          </div>
-          <SiteFooter />
-          <CartSidebar />
-        </CartProvider>
+        <Navigation />
+        <div style={{ minHeight: 'calc(100vh - 200px)' }}>
+          {children}
+        </div>
+        <SiteFooter />
       </body>
     </html>
   );

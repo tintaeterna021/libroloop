@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Book } from '@/lib/types'
-import { useCart } from '@/lib/CartContext'
 import Link from 'next/link'
 
 const FILTERS = [
@@ -18,7 +17,6 @@ const FILTERS = [
 const PAGE_SIZE = 12
 
 export default function CatalogoPage() {
-    const { addAndOpen } = useCart()
     const [books, setBooks] = useState<Book[]>([])
     const [loading, setLoading] = useState(true)
     const [loadingMore, setLoadingMore] = useState(false)
@@ -99,12 +97,6 @@ export default function CatalogoPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fetchBooks])
 
-    const handleAddToCart = (e: React.MouseEvent, bookId: string) => {
-        e.preventDefault()
-        addAndOpen(bookId)
-        setAddedId(bookId)
-        setTimeout(() => setAddedId(null), 1500)
-    }
 
     return (
         <div style={{ backgroundColor: '#F5F2E7', minHeight: '100vh' }}>
@@ -194,22 +186,6 @@ export default function CatalogoPage() {
                                                     ${book.price.toFixed(0)}
                                                 </span>
                                             </div>
-                                            <button
-                                                onClick={e => handleAddToCart(e, book.id)}
-                                                title="Añadir al Carrito"
-                                                style={{
-                                                    backgroundColor: addedId === book.id ? '#A67C00' : '#1B3022',
-                                                    color: 'white',
-                                                    border: 'none',
-                                                    borderRadius: '8px',
-                                                    padding: '0.4rem 0.6rem',
-                                                    cursor: 'pointer',
-                                                    fontSize: '0.95rem',
-                                                    transition: 'background-color 0.2s',
-                                                }}
-                                            >
-                                                {addedId === book.id ? '✓' : '🛒'}
-                                            </button>
                                         </div>
                                     </div>
                                 </Link>
