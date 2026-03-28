@@ -4,14 +4,13 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useParams } from 'next/navigation'
 import { Book } from '@/lib/types'
-import { addToGuestCart } from '@/lib/cart'
 import Link from 'next/link'
 
 export default function BookDetailPage() {
     const params = useParams()
     const [book, setBook] = useState<Book | null>(null)
     const [loading, setLoading] = useState(true)
-    const [added, setAdded] = useState(false)
+    const [activeImage, setActiveImage] = useState<'cover'|'back'>('cover')
 
     useEffect(() => {
         fetchBook()
@@ -31,13 +30,6 @@ export default function BookDetailPage() {
         } finally {
             setLoading(false)
         }
-    }
-
-    const handleAddToCart = () => {
-        if (!book) return
-        addToGuestCart(book.id, 1)
-        setAdded(true)
-        setTimeout(() => setAdded(false), 2000)
     }
 
     if (loading) {
@@ -70,8 +62,7 @@ export default function BookDetailPage() {
     const originalPrice = book.price * 2
 
     return (
-        /* pb-32 leaves room for the sticky button */
-        <div style={{ minHeight: '100vh', backgroundColor: '#F5F2E7', paddingBottom: '6rem' }}>
+        <div style={{ minHeight: '100vh', backgroundColor: '#F5F2E7', paddingBottom: '2rem' }}>
 
             {/* Back link */}
             <div style={{ padding: '1rem 1rem 0', maxWidth: '900px', margin: '0 auto' }}>
@@ -86,7 +77,7 @@ export default function BookDetailPage() {
             <div style={{ maxWidth: '900px', margin: '0 auto', padding: '1.5rem 1rem' }}>
                 <div className="md:flex gap-10">
 
-                    {/* ── 1. Image gallery (swipe placeholder) ── */}
+                    {/* ── 1. Image gallery ── */}
                     <div style={{ flex: '0 0 340px' }}>
                         <div style={{
                             aspectRatio: '3/4',
@@ -95,11 +86,12 @@ export default function BookDetailPage() {
                             background: '#e0ddd2',
                             boxShadow: '0 4px 24px rgba(27,48,34,0.12)',
                             position: 'relative',
+                            marginBottom: '1rem'
                         }}>
-                            {book.image_url ? (
+                            {(activeImage === 'cover' ? book.cover_url : book.back_cover_url) ? (
                                 <img
-                                    src={book.image_url}
-                                    alt={book.title}
+                                    src={(activeImage === 'cover' ? book.cover_url : book.back_cover_url) as string}
+                                    alt={`${book.title} - ${activeImage}`}
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
                             ) : (
@@ -108,12 +100,34 @@ export default function BookDetailPage() {
                                 </div>
                             )}
                         </div>
-                        {/* dots indicator (cosmetic) */}
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginTop: '0.75rem' }}>
-                            {[0, 1].map(i => (
-                                <span key={i} style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: i === 0 ? '#1B3022' : '#ccc', display: 'inline-block' }} />
-                            ))}
-                        </div>
+                        
+                        {/* Thumbnails */}
+                        {book.cover_url && book.back_cover_url && (
+                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                                <button
+                                    onClick={() => setActiveImage('cover')}
+                                    style={{
+                                        width: '60px', height: '80px',
+                                        borderRadius: '8px', overflow: 'hidden',
+                                        border: activeImage === 'cover' ? '2px solid #1B3022' : '2px solid transparent',
+                                        padding: 0, cursor: 'pointer',
+                                    }}
+                                >
+                                    <img src={book.cover_url} alt="Portada" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                </button>
+                                <button
+                                    onClick={() => setActiveImage('back')}
+                                    style={{
+                                        width: '60px', height: '80px',
+                                        borderRadius: '8px', overflow: 'hidden',
+                                        border: activeImage === 'back' ? '2px solid #1B3022' : '2px solid transparent',
+                                        padding: 0, cursor: 'pointer',
+                                    }}
+                                >
+                                    <img src={book.back_cover_url} alt="Contraportada" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* ── 2. Details block ── */}
@@ -152,7 +166,6 @@ export default function BookDetailPage() {
                                 { icon: '🏢', label: 'Editorial', value: book.publisher },
                                 { icon: '🔢', label: 'ISBN', value: book.isbn },
                                 { icon: '📖', label: 'Género', value: book.genre },
-                                { icon: '✨', label: 'Condición', value: book.condition },
                                 { icon: '🏷️', label: 'Categoría', value: book.category },
                             ].filter(r => r.value).map(row => (
                                 <div key={row.label} style={{ display: 'flex', gap: '0.6rem', marginBottom: '0.5rem', alignItems: 'center' }}>
@@ -178,59 +191,6 @@ export default function BookDetailPage() {
                 </div>
             </div>
 
-            {/* ── 5. Sticky "Añadir al Carrito" button ── */}
-            <div style={{
-                position: 'fixed',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                padding: '1rem 1.25rem',
-                backgroundColor: 'white',
-                borderTop: '1px solid #e0ddd2',
-                boxShadow: '0 -4px 16px rgba(0,0,0,0.1)',
-                zIndex: 100,
-            }}>
-                <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-                    {book.status === 'available' ? (
-                        <button
-                            onClick={handleAddToCart}
-                            className="btn-cart"
-                            style={{
-                                width: '100%',
-                                padding: '1rem',
-                                borderRadius: '999px',
-                                fontSize: '1rem',
-                                border: 'none',
-                                cursor: 'pointer',
-                                backgroundColor: added ? '#A67C00' : '#1B3022',
-                                color: 'white',
-                                fontFamily: "'Montserrat', sans-serif",
-                                fontWeight: 700,
-                                transition: 'background-color 0.3s, transform 0.1s',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '0.5rem',
-                            }}
-                        >
-                            {added ? '✓ Agregado al Carrito' : '🛒 Añadir al Carrito'}
-                        </button>
-                    ) : (
-                        <div style={{
-                            width: '100%',
-                            padding: '1rem',
-                            borderRadius: '999px',
-                            textAlign: 'center',
-                            backgroundColor: '#ccc',
-                            color: '#888',
-                            fontFamily: "'Montserrat', sans-serif",
-                            fontWeight: 700,
-                        }}>
-                            No Disponible
-                        </div>
-                    )}
-                </div>
-            </div>
         </div>
     )
 }

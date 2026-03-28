@@ -3,7 +3,7 @@
 -- Run this after create_books_table.sql
 -- ============================================================
 
-INSERT INTO books (title, author, description, price, seller_id, status, isbn, condition, category, year, publisher, genre, image_url)
+INSERT INTO books (title, author, description, price, seller_id, status, isbn, category, year, publisher, genre, cover_url, back_cover_url)
 VALUES
 
 -- 1
@@ -11,63 +11,71 @@ VALUES
  'Gabriel García Márquez',
  'La historia de la familia Buendía a lo largo de siete generaciones en el pueblo mítico de Macondo. Una obra maestra del realismo mágico latinoamericano.',
  220, gen_random_uuid(), 'available',
- '9786070728792', 'good', 'ficcion', 2015, 'Diana', 'Realismo Mágico',
- 'https://covers.openlibrary.org/b/isbn/9786070728792-L.jpg'),
+ '9786070728792', 'ficcion', 2015, 'Diana', 'Realismo Mágico',
+ 'https://covers.openlibrary.org/b/isbn/9786070728792-L.jpg',
+ 'https://covers.openlibrary.org/b/isbn/9786070728792-M.jpg'),
 
 -- 2
 ('El principito',
  'Antoine de Saint-Exupéry',
  'Un piloto varado en el Sahara conoce a un pequeño príncipe que viaja de planeta en planeta. Un clásico atemporal sobre la amistad, el amor y la esencia de la vida.',
  150, gen_random_uuid(), 'available',
- '9788498381498', 'like_new', 'ficcion', 2018, 'Salamandra', 'Fábula',
- 'https://covers.openlibrary.org/b/isbn/9788498381498-L.jpg'),
+ '9788498381498', 'ficcion', 2018, 'Salamandra', 'Fábula',
+ 'https://covers.openlibrary.org/b/isbn/9788498381498-L.jpg',
+ 'https://covers.openlibrary.org/b/isbn/9788498381498-M.jpg'),
 
 -- 3
 ('Hábitos atómicos',
  'James Clear',
  'Un método sencillo y comprobado para desarrollar buenos hábitos y eliminar los malos. La guía definitiva para hacer pequeños cambios que producen resultados extraordinarios.',
  320, gen_random_uuid(), 'available',
- '9786075278384', 'new', 'desarrollo-personal', 2020, 'Paidós', 'Autoayuda',
- 'https://covers.openlibrary.org/b/isbn/9786075278384-L.jpg'),
+ '9786075278384', 'desarrollo-personal', 2020, 'Paidós', 'Autoayuda',
+ 'https://covers.openlibrary.org/b/isbn/9786075278384-L.jpg',
+ 'https://covers.openlibrary.org/b/isbn/9786075278384-M.jpg'),
 
 -- 4
 ('1984',
  'George Orwell',
  'En un futuro distópico, Winston Smith trabaja para el Partido reescribiendo la historia. Una novela profética sobre la vigilancia, la propaganda y la supresión de la libertad.',
  180, gen_random_uuid(), 'available',
- '9786070727771', 'good', 'ficcion', 2017, 'Debolsillo', 'Distopía',
- 'https://covers.openlibrary.org/b/isbn/9786070727771-L.jpg'),
+ '9786070727771', 'ficcion', 2017, 'Debolsillo', 'Distopía',
+ 'https://covers.openlibrary.org/b/isbn/9786070727771-L.jpg',
+ 'https://covers.openlibrary.org/b/isbn/9786070727771-M.jpg'),
 
 -- 5
 ('El alquimista',
  'Paulo Coelho',
  'Un joven pastor andaluz emprende un viaje hacia los tesoros del Egipto. Un relato fabuloso sobre la importancia de escuchar el corazón y de seguir nuestros sueños.',
  175, gen_random_uuid(), 'available',
- '9786070728730', 'like_new', 'ficcion', 2016, 'Planeta', 'Ficción filosófica',
- 'https://covers.openlibrary.org/b/isbn/9786070728730-L.jpg'),
+ '9786070728730', 'ficcion', 2016, 'Planeta', 'Ficción filosófica',
+ 'https://covers.openlibrary.org/b/isbn/9786070728730-L.jpg',
+ 'https://covers.openlibrary.org/b/isbn/9786070728730-M.jpg'),
 
 -- 6
 ('Sapiens: De animales a dioses',
  'Yuval Noah Harari',
  'Una breve historia de la humanidad que examina cómo Homo sapiens llegó a dominar la Tierra, desde la revolución cognitiva hasta la revolución científica.',
  370, gen_random_uuid(), 'available',
- '9786075275017', 'good', 'no-ficcion', 2019, 'Debate', 'Historia',
- 'https://covers.openlibrary.org/b/isbn/9786075275017-L.jpg'),
+ '9786075275017', 'no-ficcion', 2019, 'Debate', 'Historia',
+ 'https://covers.openlibrary.org/b/isbn/9786075275017-L.jpg',
+ 'https://covers.openlibrary.org/b/isbn/9786075275017-M.jpg'),
 
 -- 7
 ('El nombre del viento',
  'Patrick Rothfuss',
  'Kvothe, el legendario mago, narra su propia historia: desde su infancia en una familia de actores viajeros hasta convertirse en el estudiante más brillante de su generación.',
  280, gen_random_uuid(), 'available',
- '9788401337208', 'good', 'ficcion', 2014, 'Plaza & Janés', 'Fantasía épica',
- 'https://covers.openlibrary.org/b/isbn/9788401337208-L.jpg'),
+ '9788401337208', 'ficcion', 2014, 'Plaza & Janés', 'Fantasía épica',
+ 'https://covers.openlibrary.org/b/isbn/9788401337208-L.jpg',
+ 'https://covers.openlibrary.org/b/isbn/9788401337208-M.jpg'),
 
 -- 8
 ('Piense y hágase rico',
  'Napoleon Hill',
  'El resultado de más de 20 años de investigación sobre los hábitos y filosofías de los hombres más ricos del mundo. Un clásico de la superación personal.',
  130, gen_random_uuid(), 'available',
- '9786077483113', 'acceptable', 'desarrollo-personal', 2012, 'Tomo', 'Autoayuda',
+ '9786077483113', 'desarrollo-personal', 2012, 'Tomo', 'Autoayuda',
+ NULL,
  NULL),
 
 -- 9
@@ -75,7 +83,8 @@ VALUES
  'Miguel de Cervantes',
  'Las aventuras del ingenioso hidalgo don Quijote de la Mancha y su escudero Sancho Panza. Considerada la primera novela moderna y la obra cumbre de la literatura española.',
  195, gen_random_uuid(), 'available',
- '9788467047059', 'good', 'clasicos', 2014, 'Espasa', 'Novela picaresca',
+ '9788467047059', 'clasicos', 2014, 'Espasa', 'Novela picaresca',
+ NULL,
  NULL),
 
 -- 10
@@ -83,8 +92,9 @@ VALUES
  'J.K. Rowling',
  'El joven Harry Potter descubre en su undécimo cumpleaños que es un mago y comienza sus estudios en Hogwarts, la escuela de magia y hechicería más famosa del mundo.',
  210, gen_random_uuid(), 'available',
- '9788478884452', 'like_new', 'ficcion', 2015, 'Salamandra', 'Fantasía juvenil',
- 'https://covers.openlibrary.org/b/isbn/9788478884452-L.jpg');
+ '9788478884452', 'ficcion', 2015, 'Salamandra', 'Fantasía juvenil',
+ 'https://covers.openlibrary.org/b/isbn/9788478884452-L.jpg',
+ 'https://covers.openlibrary.org/b/isbn/9788478884452-M.jpg');
 
 -- Verificar que se insertaron
 SELECT title, author, price, genre, year FROM books ORDER BY created_at DESC LIMIT 10;

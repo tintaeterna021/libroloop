@@ -33,15 +33,6 @@ export interface Address {
     created_at: string
 }
 
-export interface CartItem {
-    id: string
-    user_id: string
-    book_id: string
-    quantity: number
-    created_at: string
-    book?: Book // Populated via join
-}
-
 export interface Order {
     id: string
     buyer_id: string
@@ -64,8 +55,8 @@ export interface Book {
     price: number
     seller_id: string
     status: 'available' | 'sold' | 'revision'
-    image_url?: string
-    condition?: string
+    cover_url?: string
+    back_cover_url?: string
     isbn?: string
     category?: string
     year?: number
@@ -91,13 +82,3 @@ export function isAdmin(profile: Profile | null): boolean {
     return hasRole(profile, 'admin')
 }
 
-// Cart stored in localStorage for guests
-export interface GuestCartItem {
-    book_id: string
-    quantity: number
-}
-
-export interface GuestCart {
-    items: GuestCartItem[]
-    updated_at: string
-}

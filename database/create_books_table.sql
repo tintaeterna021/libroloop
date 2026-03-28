@@ -11,9 +11,9 @@ CREATE TABLE IF NOT EXISTS books (
   price decimal(10,2) NOT NULL CHECK (price >= 0),
   seller_id uuid, -- Reference removed, just a placeholder if needed
   status text DEFAULT 'available' CHECK (status IN ('available', 'sold', 'revision')),
-  image_url text,
+  cover_url text,
+  back_cover_url text,
   isbn text,
-  condition text CHECK (condition IN ('new', 'like_new', 'good', 'acceptable')),
   category text,
   year integer,
   publisher text,

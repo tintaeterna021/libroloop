@@ -164,8 +164,8 @@ export default function CatalogoPage() {
                             {books.map(book => (
                                 <Link href={`/books/${book.id}`} key={book.id} className="book-card" style={{ textDecoration: 'none', display: 'block' }}>
                                     <div style={{ aspectRatio: '3/4', background: '#e8e4d8', overflow: 'hidden' }}>
-                                        {book.image_url ? (
-                                            <img src={book.image_url} alt={book.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        {book.cover_url ? (
+                                            <img src={book.cover_url} alt={book.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         ) : (
                                             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem' }}>📚</div>
                                         )}
