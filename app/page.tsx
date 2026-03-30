@@ -91,6 +91,24 @@ export default function Home() {
             >
               Ver Catálogo
             </Link>
+            <Link
+              href="/vender"
+              style={{
+                backgroundColor: 'transparent',
+                color: 'white',
+                border: '2px solid rgba(255,255,255,0.7)',
+                borderRadius: '999px',
+                padding: '0.85rem 2rem',
+                fontFamily: "'Montserrat', sans-serif",
+                fontWeight: 700,
+                fontSize: '0.95rem',
+                textDecoration: 'none',
+                backdropFilter: 'blur(4px)',
+                transition: 'background-color 0.2s',
+              }}
+            >
+              Quiero vender
+            </Link>
           </div>
         </div>
       </section>

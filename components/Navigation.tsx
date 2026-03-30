@@ -41,10 +41,28 @@ export default function Navigation() {
                     {/* ── ALIGN RIGHT: Nav links ── */}
                     <div style={{
                         flex: 1, display: 'flex', justifyContent: 'flex-end',
-                        gap: '0.25rem',
+                        alignItems: 'center',
+                        gap: '0.5rem',
                     }}>
                         <Link href="/catalogo" style={linkStyle('/catalogo')}>
                             Catálogo
+                        </Link>
+                        <Link
+                            href="/vender"
+                            style={{
+                                fontFamily: "'Montserrat', sans-serif",
+                                fontSize: '0.875rem',
+                                fontWeight: 700,
+                                padding: '0.4rem 1rem',
+                                borderRadius: '999px',
+                                color: pathname === '/vender' ? '#1B3022' : '#F5F2E7',
+                                backgroundColor: pathname === '/vender' ? '#F5F2E7' : 'transparent',
+                                border: '1.5px solid rgba(255,255,255,0.5)',
+                                textDecoration: 'none',
+                                transition: 'all 0.15s',
+                            }}
+                        >
+                            Vender
                         </Link>
                     </div>
                 </div>
