@@ -10,8 +10,85 @@ interface BookSlot {
   backPreview: string | null
 }
 
+type StepNumber = 1 | 2 | 3
+
+function isBookComplete(book: BookSlot) {
+  return !!book.coverPreview && !!book.backPreview
+}
+
+function Stepper({
+  currentStep,
+  stepsEnabled,
+  onSelectStep,
+}: {
+  currentStep: StepNumber
+  stepsEnabled: Record<StepNumber, boolean>
+  onSelectStep: (step: StepNumber) => void
+}) {
+  const steps: Array<{ step: StepNumber; label: string }> = [
+    { step: 1, label: 'Paso 1' },
+    { step: 2, label: 'Paso 2' },
+    { step: 3, label: 'Paso 3' },
+  ]
+
+  return (
+    <div
+      style={{
+        maxWidth: '480px',
+        margin: '0 auto 1.25rem',
+        padding: '0 0.25rem',
+        display: 'flex',
+        gap: '0.5rem',
+        justifyContent: 'space-between',
+      }}
+    >
+      {steps.map(({ step, label }) => {
+        const isActive = step === currentStep
+        const isDone = step < currentStep
+        const disabled = step > currentStep || !stepsEnabled[step]
+
+        return (
+          <button
+            key={step}
+            type="button"
+            disabled={disabled}
+            onClick={() => onSelectStep(step)}
+            aria-current={isActive ? 'step' : undefined}
+            style={{
+              flex: 1,
+              padding: '0.5rem 0.4rem',
+              borderRadius: '999px',
+              border: isActive ? '1.5px solid rgba(255,255,255,0.8)' : '1.5px solid #e0ddd2',
+              backgroundColor: isActive ? '#1B3022' : isDone ? 'rgba(27,48,34,0.12)' : 'transparent',
+              color: isActive ? '#F5F2E7' : '#1B3022',
+              cursor: disabled ? 'not-allowed' : 'pointer',
+              opacity: disabled ? 0.65 : 1,
+              fontFamily: "'Montserrat', sans-serif",
+              fontWeight: 800,
+              fontSize: '0.78rem',
+              transition: 'all 0.15s',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {isDone ? '✓ ' : ''}
+            {label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 // ─── Step 1: Quality Filter ──────────────────────────────────
-function StepFilter({ onNext }: { onNext: () => void }) {
+function StepFilter({
+  onNext,
+  onSelectStep,
+}: {
+  onNext: () => void
+  onSelectStep: (step: StepNumber) => void
+}) {
   const rules = [
     {
       icon: (
@@ -62,6 +139,11 @@ function StepFilter({ onNext }: { onNext: () => void }) {
       padding: '2rem 1.5rem',
     }}>
       <div style={{ maxWidth: '420px', width: '100%' }}>
+        <Stepper
+          currentStep={1}
+          stepsEnabled={{ 1: true, 2: true, 3: true }}
+          onSelectStep={onSelectStep}
+        />
         {/* Logo / Brand */}
         <p style={{
           fontFamily: "'Playfair Display', serif",
@@ -250,12 +332,25 @@ function BookCard({
   )
 }
 
-function StepUpload({ onNext }: { onNext: (books: BookSlot[]) => void }) {
-  const [books, setBooks] = useState<BookSlot[]>([
-    { id: 1, coverPreview: null, backPreview: null },
-  ])
+function StepUpload({
+  books,
+  setBooks,
+  onNext,
+  onBack,
+  onSelectStep,
+}: {
+  books: BookSlot[]
+  setBooks: React.Dispatch<React.SetStateAction<BookSlot[]>>
+  onNext: (books: BookSlot[]) => void
+  onBack: () => void
+  onSelectStep: (step: StepNumber) => void
+}) {
+  const lastBook = books[books.length - 1]
+  const canAddAnother = !!lastBook && isBookComplete(lastBook)
+  const canProceed = books.length >= 1 && books.every(isBookComplete)
 
   const addBook = () => {
+    if (!canAddAnother) return
     setBooks(prev => [...prev, { id: prev.length + 1, coverPreview: null, backPreview: null }])
   }
 
@@ -265,11 +360,32 @@ function StepUpload({ onNext }: { onNext: (books: BookSlot[]) => void }) {
   const updateBack = (id: number, url: string) =>
     setBooks(prev => prev.map(b => b.id === id ? { ...b, backPreview: url } : b))
 
-  const hasAtLeastOne = books.some(b => b.coverPreview || b.backPreview)
-
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#F5F2E7', padding: '1.5rem 1rem 8rem' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#F5F2E7', padding: '1.5rem 1rem 1.5rem' }}>
       <div style={{ maxWidth: '480px', margin: '0 auto' }}>
+        <Stepper
+          currentStep={2}
+          stepsEnabled={{ 1: true, 2: true, 3: canProceed }}
+          onSelectStep={onSelectStep}
+        />
+
+        <button
+          type="button"
+          onClick={onBack}
+          style={{
+            marginBottom: '1rem',
+            background: 'transparent',
+            border: 'none',
+            color: '#1B3022',
+            fontFamily: "'Montserrat', sans-serif",
+            fontWeight: 800,
+            cursor: 'pointer',
+            padding: 0,
+          }}
+        >
+          ← Regresar al paso anterior
+        </button>
+
         <p style={{
           fontFamily: "'Playfair Display', serif",
           fontWeight: 700,
@@ -305,6 +421,7 @@ function StepUpload({ onNext }: { onNext: (books: BookSlot[]) => void }) {
         {/* Add another */}
         <button
           onClick={addBook}
+          disabled={!canAddAnother}
           style={{
             width: '100%',
             padding: '0.85rem',
@@ -315,9 +432,10 @@ function StepUpload({ onNext }: { onNext: (books: BookSlot[]) => void }) {
             fontFamily: "'Montserrat', sans-serif",
             fontWeight: 700,
             fontSize: '0.9rem',
-            cursor: 'pointer',
+            cursor: canAddAnother ? 'pointer' : 'not-allowed',
             marginBottom: '1rem',
             transition: 'background-color 0.2s',
+            opacity: canAddAnother ? 1 : 0.6,
           }}
           onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f0ede3')}
           onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'white')}
@@ -326,10 +444,11 @@ function StepUpload({ onNext }: { onNext: (books: BookSlot[]) => void }) {
         </button>
       </div>
 
-      {/* Sticky bottom CTA */}
+      {/* Sticky bottom CTA (sin "arrastre" tipo fixed) */}
       <div style={{
-        position: 'fixed',
-        bottom: 0, left: 0, right: 0,
+        position: 'sticky',
+        bottom: 0,
+        zIndex: 20,
         padding: '1rem 1.5rem',
         backgroundColor: '#F5F2E7',
         borderTop: '1px solid #e0ddd2',
@@ -337,19 +456,20 @@ function StepUpload({ onNext }: { onNext: (books: BookSlot[]) => void }) {
         <div style={{ maxWidth: '480px', margin: '0 auto' }}>
           <button
             onClick={() => onNext(books)}
-            disabled={!hasAtLeastOne}
+            disabled={!canProceed}
             style={{
               width: '100%',
               padding: '1.1rem',
-              backgroundColor: hasAtLeastOne ? '#1B3022' : '#ccc',
+              backgroundColor: canProceed ? '#1B3022' : '#ccc',
               color: '#F5F2E7',
               fontFamily: "'Montserrat', sans-serif",
               fontWeight: 700,
               fontSize: '1rem',
               border: 'none',
               borderRadius: '999px',
-              cursor: hasAtLeastOne ? 'pointer' : 'not-allowed',
+              cursor: canProceed ? 'pointer' : 'not-allowed',
               transition: 'background-color 0.2s',
+              touchAction: 'manipulation',
             }}
           >
             ¡Casi listo!
@@ -361,7 +481,15 @@ function StepUpload({ onNext }: { onNext: (books: BookSlot[]) => void }) {
 }
 
 // ─── Step 3: Account Creation ────────────────────────────────
-function StepAccount({ bookCount }: { bookCount: number }) {
+function StepAccount({
+  bookCount,
+  onBack,
+  onSelectStep,
+}: {
+  bookCount: number
+  onBack: () => void
+  onSelectStep: (step: StepNumber) => void
+}) {
   const [showPassword, setShowPassword] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [form, setForm] = useState({ phone: '', email: '', password: '' })
@@ -422,6 +550,28 @@ function StepAccount({ bookCount }: { bookCount: number }) {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#F5F2E7', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem 1.5rem' }}>
       <div style={{ maxWidth: '420px', width: '100%' }}>
+        <Stepper
+          currentStep={3}
+          stepsEnabled={{ 1: true, 2: true, 3: true }}
+          onSelectStep={onSelectStep}
+        />
+
+        <button
+          type="button"
+          onClick={onBack}
+          style={{
+            marginBottom: '1rem',
+            background: 'transparent',
+            border: 'none',
+            color: '#1B3022',
+            fontFamily: "'Montserrat', sans-serif",
+            fontWeight: 800,
+            cursor: 'pointer',
+            padding: 0,
+          }}
+        >
+          ← Regresar al paso anterior
+        </button>
 
         <h2 style={{
           fontFamily: "'Playfair Display', serif",
@@ -569,17 +719,41 @@ function StepAccount({ bookCount }: { bookCount: number }) {
 
 // ─── Main Page (Orchestrator) ────────────────────────────────
 export default function VenderPage() {
-  const [step, setStep] = useState<1 | 2 | 3>(1)
-  const [books, setBooks] = useState<BookSlot[]>([])
+  const [step, setStep] = useState<StepNumber>(1)
+  const [books, setBooks] = useState<BookSlot[]>([
+    { id: 1, coverPreview: null, backPreview: null },
+  ])
 
-  if (step === 1) return <StepFilter onNext={() => setStep(2)} />
-  if (step === 2) return (
-    <StepUpload
-      onNext={(b) => {
-        setBooks(b)
-        setStep(3)
-      }}
+  const canProceed = books.length >= 1 && books.every(isBookComplete)
+  const stepsEnabled: Record<StepNumber, boolean> = { 1: true, 2: true, 3: canProceed }
+
+  const onSelectStep = (target: StepNumber) => {
+    // Solo regresamos a pasos anteriores (no saltar hacia adelante)
+    if (target > step) return
+    setStep(target)
+  }
+
+  if (step === 1) {
+    return <StepFilter onNext={() => setStep(2)} onSelectStep={onSelectStep} />
+  }
+
+  if (step === 2) {
+    return (
+      <StepUpload
+        books={books}
+        setBooks={setBooks}
+        onBack={() => setStep(1)}
+        onNext={(b) => setStep(3)}
+        onSelectStep={onSelectStep}
+      />
+    )
+  }
+
+  return (
+    <StepAccount
+      bookCount={books.length}
+      onBack={() => setStep(2)}
+      onSelectStep={onSelectStep}
     />
   )
-  return <StepAccount bookCount={books.filter(b => b.coverPreview || b.backPreview).length} />
 }

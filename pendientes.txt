@@ -1,0 +1,6 @@
+te voy a platicar unos flujos y quiero que me des una propuesta de bd. quiero hacer este proyecto estoy usando next y supabase.
+
+1. detalle de libro: imágenes de libro portada y contraportada, titulo, autor, precio original, precio a vender, año, editorial, isbn, género, fecha de publicación, idioma, número de páginas, descripción, asociado a una cuenta, estatus, isbn, link amazon, link gahndhi, número orden
+2. checkout: Correo electrónico , Teléfono, Nombre, Calle, número exterior,  y número interior (opcional), , Código Postal, Colonia, método de pago.
+3. cuenta: contraseña, todos los datos del checkout, sin método de pago
+4. flujo orden vendida: número de orden, a un comprador(cuenta o  checkout) asociado,total, adelanto, por pagar, estatus
