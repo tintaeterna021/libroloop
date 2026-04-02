@@ -16,6 +16,11 @@ function isBookComplete(book: BookSlot) {
   return !!book.coverPreview && !!book.backPreview
 }
 
+function revokeBookPreviews(book: BookSlot) {
+  if (book.coverPreview?.startsWith('blob:')) URL.revokeObjectURL(book.coverPreview)
+  if (book.backPreview?.startsWith('blob:')) URL.revokeObjectURL(book.backPreview)
+}
+
 function Stepper({
   currentStep,
   stepsEnabled,
@@ -301,11 +306,13 @@ function BookCard({
   index,
   onCover,
   onBack,
+  onRemove,
 }: {
   book: BookSlot
   index: number
   onCover: (url: string) => void
   onBack: (url: string) => void
+  onRemove?: () => void
 }) {
   return (
     <div style={{
@@ -315,15 +322,43 @@ function BookCard({
       boxShadow: '0 2px 12px rgba(27,48,34,0.08)',
       marginBottom: '1rem',
     }}>
-      <p style={{
-        fontFamily: "'Montserrat', sans-serif",
-        fontWeight: 700,
-        fontSize: '0.9rem',
-        color: '#1B3022',
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '0.75rem',
         marginBottom: '1rem',
       }}>
-        Libro {index + 1}
-      </p>
+        <p style={{
+          fontFamily: "'Montserrat', sans-serif",
+          fontWeight: 700,
+          fontSize: '0.9rem',
+          color: '#1B3022',
+          margin: 0,
+        }}>
+          Libro {index + 1}
+        </p>
+        {onRemove && (
+          <button
+            type="button"
+            onClick={onRemove}
+            style={{
+              flexShrink: 0,
+              padding: '0.35rem 0.75rem',
+              borderRadius: '999px',
+              border: '1.5px solid #c0392b',
+              background: 'white',
+              color: '#c0392b',
+              fontFamily: "'Montserrat', sans-serif",
+              fontWeight: 700,
+              fontSize: '0.72rem',
+              cursor: 'pointer',
+            }}
+          >
+            Eliminar
+          </button>
+        )}
+      </div>
       <div style={{ display: 'flex', gap: '0.75rem' }}>
         <PhotoSlot label="Foto Portada" preview={book.coverPreview} onFile={onCover} />
         <PhotoSlot label="Foto Contraportada" preview={book.backPreview} onFile={onBack} />
@@ -351,7 +386,19 @@ function StepUpload({
 
   const addBook = () => {
     if (!canAddAnother) return
-    setBooks(prev => [...prev, { id: prev.length + 1, coverPreview: null, backPreview: null }])
+    setBooks(prev => {
+      const nextId = prev.reduce((m, b) => Math.max(m, b.id), 0) + 1
+      return [...prev, { id: nextId, coverPreview: null, backPreview: null }]
+    })
+  }
+
+  const removeBook = (id: number) => {
+    setBooks(prev => {
+      if (prev.length <= 1) return prev
+      const target = prev.find(b => b.id === id)
+      if (target) revokeBookPreviews(target)
+      return prev.filter(b => b.id !== id)
+    })
   }
 
   const updateCover = (id: number, url: string) =>
@@ -415,6 +462,7 @@ function StepUpload({
             index={i}
             onCover={url => updateCover(book.id, url)}
             onBack={url => updateBack(book.id, url)}
+            onRemove={books.length > 1 ? () => removeBook(book.id) : undefined}
           />
         ))}
 
