@@ -2,12 +2,15 @@
 
 import { useState, useRef } from 'react'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
 
 // ─── Types ───────────────────────────────────────────────────
 interface BookSlot {
   id: number
   coverPreview: string | null
+  coverFile: File | null
   backPreview: string | null
+  backFile: File | null
 }
 
 type StepNumber = 1 | 2 | 3
@@ -233,7 +236,7 @@ function PhotoSlot({
 }: {
   label: string
   preview: string | null
-  onFile: (url: string) => void
+  onFile: (url: string, file: File) => void
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -241,7 +244,7 @@ function PhotoSlot({
     const file = e.target.files?.[0]
     if (!file) return
     const url = URL.createObjectURL(file)
-    onFile(url)
+    onFile(url, file)
   }
 
   return (
@@ -310,8 +313,8 @@ function BookCard({
 }: {
   book: BookSlot
   index: number
-  onCover: (url: string) => void
-  onBack: (url: string) => void
+  onCover: (url: string, file: File) => void
+  onBack: (url: string, file: File) => void
   onRemove?: () => void
 }) {
   return (
@@ -388,7 +391,7 @@ function StepUpload({
     if (!canAddAnother) return
     setBooks(prev => {
       const nextId = prev.reduce((m, b) => Math.max(m, b.id), 0) + 1
-      return [...prev, { id: nextId, coverPreview: null, backPreview: null }]
+      return [...prev, { id: nextId, coverPreview: null, coverFile: null, backPreview: null, backFile: null }]
     })
   }
 
@@ -401,11 +404,11 @@ function StepUpload({
     })
   }
 
-  const updateCover = (id: number, url: string) =>
-    setBooks(prev => prev.map(b => b.id === id ? { ...b, coverPreview: url } : b))
+  const updateCover = (id: number, url: string, file: File) =>
+    setBooks(prev => prev.map(b => b.id === id ? { ...b, coverPreview: url, coverFile: file } : b))
 
-  const updateBack = (id: number, url: string) =>
-    setBooks(prev => prev.map(b => b.id === id ? { ...b, backPreview: url } : b))
+  const updateBack = (id: number, url: string, file: File) =>
+    setBooks(prev => prev.map(b => b.id === id ? { ...b, backPreview: url, backFile: file } : b))
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#F5F2E7', padding: '1.5rem 1rem 1.5rem' }}>
@@ -460,8 +463,8 @@ function StepUpload({
             key={book.id}
             book={book}
             index={i}
-            onCover={url => updateCover(book.id, url)}
-            onBack={url => updateBack(book.id, url)}
+            onCover={(url, file) => updateCover(book.id, url, file)}
+            onBack={(url, file) => updateBack(book.id, url, file)}
             onRemove={books.length > 1 ? () => removeBook(book.id) : undefined}
           />
         ))}
@@ -530,21 +533,89 @@ function StepUpload({
 
 // ─── Step 3: Account Creation ────────────────────────────────
 function StepAccount({
-  bookCount,
+  books,
   onBack,
   onSelectStep,
 }: {
-  bookCount: number
+  books: BookSlot[]
   onBack: () => void
   onSelectStep: (step: StepNumber) => void
 }) {
   const [showPassword, setShowPassword] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
   const [form, setForm] = useState({ phone: '', email: '', password: '' })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const bookCount = books.length
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSubmitted(true)
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    setSubmitError('')
+
+    try {
+      let { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: form.email,
+        password: form.password,
+      })
+
+      // Si falla porque no existen las credenciales, entonces lo registramos
+      if (authError && authError.message.toLowerCase().includes('invalid login')) {
+         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+           email: form.email,
+           password: form.password,
+         })
+         if (signUpError) throw signUpError
+         authData = signUpData
+      } else if (authError) {
+         throw authError
+      }
+
+      const user = authData.user
+      if (!user) throw new Error("No se pudo obtener el usuario")
+
+      await supabase.from('profiles').upsert({
+        id: user.id,
+        email: form.email,
+        phone: form.phone,
+        name: form.email.split('@')[0],
+      }, { onConflict: 'id' })
+
+      for (const book of books) {
+        if (!book.coverFile || !book.backFile) continue;
+
+        const coverExt = book.coverFile.name.split('.').pop()
+        const backExt = book.backFile.name.split('.').pop()
+        const coverFilename = `uploads/${user.id}/${book.id}_cover_${Date.now()}.${coverExt}`
+        const backFilename = `uploads/${user.id}/${book.id}_back_${Date.now()}.${backExt}`
+
+        const { error: coverError } = await supabase.storage.from('books').upload(coverFilename, book.coverFile, { upsert: true })
+        if (coverError) throw coverError
+
+        const { error: backError } = await supabase.storage.from('books').upload(backFilename, book.backFile, { upsert: true })
+        if (backError) throw backError
+
+        const { data: coverUrlData } = supabase.storage.from('books').getPublicUrl(coverFilename)
+        const { data: backUrlData } = supabase.storage.from('books').getPublicUrl(backFilename)
+
+        const { error: dbError } = await supabase.from('books').insert({
+          user_id: user.id,
+          original_front_image_url: coverUrlData.publicUrl,
+          original_back_image_url: backUrlData.publicUrl,
+          status_code: 1,
+        })
+        if (dbError) throw dbError
+      }
+
+      setSubmitted(true)
+    } catch (err: any) {
+      console.error(err)
+      setSubmitError(err.message || 'Ocurrió un error al procesar tu solicitud.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (submitted) {
@@ -722,10 +793,18 @@ function StepAccount({
             </button>
           </div>
 
+          {/* Error Message */}
+          {submitError && (
+            <div style={{ color: '#c0392b', fontFamily: "'Montserrat', sans-serif", fontSize: '0.85rem', textAlign: 'center', margin: '0.5rem 0' }}>
+              {submitError}
+            </div>
+          )}
+
           {/* Submit */}
           <div style={{ marginTop: '0.75rem' }}>
             <button
               type="submit"
+              disabled={isSubmitting}
               style={{
                 width: '100%',
                 padding: '1.1rem',
@@ -745,7 +824,7 @@ function StepAccount({
               onMouseDown={e => (e.currentTarget.style.transform = 'scale(0.98)')}
               onMouseUp={e => (e.currentTarget.style.transform = 'scale(1)')}
             >
-              CREAR CUENTA Y ENVIAR LIBROS
+              {isSubmitting ? 'PROCESANDO...' : 'CREAR CUENTA Y ENVIAR LIBROS'}
             </button>
             <p style={{
               fontFamily: "'Montserrat', sans-serif",
@@ -769,7 +848,7 @@ function StepAccount({
 export default function VenderPage() {
   const [step, setStep] = useState<StepNumber>(1)
   const [books, setBooks] = useState<BookSlot[]>([
-    { id: 1, coverPreview: null, backPreview: null },
+    { id: 1, coverPreview: null, coverFile: null, backPreview: null, backFile: null },
   ])
 
   const canProceed = books.length >= 1 && books.every(isBookComplete)
@@ -799,7 +878,7 @@ export default function VenderPage() {
 
   return (
     <StepAccount
-      bookCount={books.length}
+      books={books}
       onBack={() => setStep(2)}
       onSelectStep={onSelectStep}
     />
