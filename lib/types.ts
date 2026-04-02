@@ -51,17 +51,19 @@ export interface Book {
     id: string
     title: string
     author: string
-    description?: string
-    price: number
-    seller_id: string
-    status: 'available' | 'sold' | 'revision'
-    cover_url?: string
-    back_cover_url?: string
-    isbn?: string
-    category?: string
     year?: number
     publisher?: string
+    isbn?: string
     genre?: string
+    publication_date?: string
+    language?: string
+    page_count?: number
+    description?: string
+    publish_front_image_url?: string
+    publish_back_image_url?: string
+    original_price: number
+    sale_price: number
+    status_code: number
     created_at: string
 }
 

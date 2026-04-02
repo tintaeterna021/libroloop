@@ -37,15 +37,15 @@ export default function CatalogoPage() {
         if (reset) setLoading(true); else setLoadingMore(true)
 
         try {
-            let query = supabase.from('books').select('*').eq('status', 'available')
+            let query = supabase.from('books').select('*').eq('status_code', 5)
 
             if (activeFilter === '__new') {
                 const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
                 query = query.gte('created_at', sevenDaysAgo)
             } else if (activeFilter === '__under200') {
-                query = query.lte('price', 200)
+                query = query.lte('sale_price', 200)
             } else if (activeFilter) {
-                query = query.eq('category', activeFilter)
+                query = query.eq('genre', activeFilter)
             }
 
             if (searchTerm) {
@@ -164,8 +164,8 @@ export default function CatalogoPage() {
                             {books.map(book => (
                                 <Link href={`/books/${book.id}`} key={book.id} className="book-card" style={{ textDecoration: 'none', display: 'block' }}>
                                     <div style={{ aspectRatio: '3/4', background: '#e8e4d8', overflow: 'hidden' }}>
-                                        {book.cover_url ? (
-                                            <img src={book.cover_url} alt={book.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        {book.publish_front_image_url ? (
+                                            <img src={book.publish_front_image_url} alt={book.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         ) : (
                                             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem' }}>📚</div>
                                         )}
@@ -180,10 +180,10 @@ export default function CatalogoPage() {
                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                             <div>
                                                 <span style={{ textDecoration: 'line-through', color: '#aaa', fontSize: '0.75rem', marginRight: '0.25rem' }}>
-                                                    ${(book.price * 2).toFixed(0)}
+                                                    ${Number(book.original_price).toFixed(0)}
                                                 </span>
                                                 <span style={{ color: '#1B3022', fontWeight: 700, fontSize: '1rem', fontFamily: "'Montserrat', sans-serif" }}>
-                                                    ${book.price.toFixed(0)}
+                                                    ${Number(book.sale_price).toFixed(0)}
                                                 </span>
                                             </div>
                                         </div>

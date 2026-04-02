@@ -59,8 +59,6 @@ export default function BookDetailPage() {
         )
     }
 
-    const originalPrice = book.price * 2
-
     return (
         <div style={{ minHeight: '100vh', backgroundColor: '#F5F2E7', paddingBottom: '2rem' }}>
 
@@ -88,9 +86,9 @@ export default function BookDetailPage() {
                             position: 'relative',
                             marginBottom: '1rem'
                         }}>
-                            {(activeImage === 'cover' ? book.cover_url : book.back_cover_url) ? (
+                            {(activeImage === 'cover' ? book.publish_front_image_url : book.publish_back_image_url) ? (
                                 <img
-                                    src={(activeImage === 'cover' ? book.cover_url : book.back_cover_url) as string}
+                                    src={(activeImage === 'cover' ? book.publish_front_image_url : book.publish_back_image_url) as string}
                                     alt={`${book.title} - ${activeImage}`}
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
@@ -102,7 +100,7 @@ export default function BookDetailPage() {
                         </div>
                         
                         {/* Thumbnails */}
-                        {book.cover_url && book.back_cover_url && (
+                        {book.publish_front_image_url && book.publish_back_image_url && (
                             <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
                                 <button
                                     onClick={() => setActiveImage('cover')}
@@ -113,7 +111,7 @@ export default function BookDetailPage() {
                                         padding: 0, cursor: 'pointer',
                                     }}
                                 >
-                                    <img src={book.cover_url} alt="Portada" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    <img src={book.publish_front_image_url} alt="Portada" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 </button>
                                 <button
                                     onClick={() => setActiveImage('back')}
@@ -124,7 +122,7 @@ export default function BookDetailPage() {
                                         padding: 0, cursor: 'pointer',
                                     }}
                                 >
-                                    <img src={book.back_cover_url} alt="Contraportada" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    <img src={book.publish_back_image_url} alt="Contraportada" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 </button>
                             </div>
                         )}
@@ -146,10 +144,10 @@ export default function BookDetailPage() {
                         {/* Price */}
                         <div style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'baseline', gap: '0.75rem' }}>
                             <span style={{ fontFamily: "'Montserrat', sans-serif", textDecoration: 'line-through', color: '#999', fontSize: '1rem' }}>
-                                ${originalPrice.toFixed(0)}
+                                ${Number(book.original_price).toFixed(0)}
                             </span>
                             <span style={{ fontFamily: "'Montserrat', sans-serif", color: '#1B3022', fontSize: '2rem', fontWeight: 800 }}>
-                                ${book.price.toFixed(0)}
+                                ${Number(book.sale_price).toFixed(0)}
                             </span>
                             <span style={{ backgroundColor: '#A67C00', color: 'white', fontSize: '0.72rem', fontWeight: 700, fontFamily: "'Montserrat', sans-serif", padding: '0.2rem 0.6rem', borderRadius: '999px' }}>
                                 50% OFF
@@ -166,7 +164,9 @@ export default function BookDetailPage() {
                                 { icon: '🏢', label: 'Editorial', value: book.publisher },
                                 { icon: '🔢', label: 'ISBN', value: book.isbn },
                                 { icon: '📖', label: 'Género', value: book.genre },
-                                { icon: '🏷️', label: 'Categoría', value: book.category },
+                                { icon: '📅', label: 'Publicación', value: book.publication_date },
+                                { icon: '🗣️', label: 'Idioma', value: book.language },
+                                { icon: '📄', label: 'Páginas', value: book.page_count?.toString() },
                             ].filter(r => r.value).map(row => (
                                 <div key={row.label} style={{ display: 'flex', gap: '0.6rem', marginBottom: '0.5rem', alignItems: 'center' }}>
                                     <span style={{ fontSize: '0.9rem' }}>{row.icon}</span>
