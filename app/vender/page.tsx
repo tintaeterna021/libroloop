@@ -239,68 +239,95 @@ function PhotoSlot({
   onFile: (url: string, file: File) => void
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setErrorMsg(null)
     const file = e.target.files?.[0]
     if (!file) return
+
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!validTypes.includes(file.type)) {
+      setErrorMsg(`Solo se permite JPG, PNG o WEBP. Formato actual: ${file.type || 'desconocido'}`)
+      return
+    }
+
+    const maxSizeInBytes = 2 * 1024 * 1024 // 2 MB
+    if (file.size > maxSizeInBytes) {
+      setErrorMsg(`La foto pesa ${(file.size / 1024 / 1024).toFixed(2)} MB. El límite es 2 MB.`)
+      return
+    }
+
     const url = URL.createObjectURL(file)
     onFile(url, file)
   }
 
   return (
-    <button
-      onClick={() => inputRef.current?.click()}
-      style={{
-        flex: 1,
-        aspectRatio: '3/4',
-        borderRadius: '12px',
-        border: '2px dashed #bbb8ad',
-        backgroundColor: 'white',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '0.5rem',
-        cursor: 'pointer',
-        overflow: 'hidden',
-        position: 'relative',
-        transition: 'border-color 0.2s',
-        padding: 0,
-      }}
-      onMouseEnter={e => (e.currentTarget.style.borderColor = '#1B3022')}
-      onMouseLeave={e => (e.currentTarget.style.borderColor = '#bbb8ad')}
-    >
-      {preview ? (
-        <img src={preview} alt={label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-      ) : (
-        <>
-          {/* Camera SVG */}
-          <svg viewBox="0 0 40 40" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 36, height: 36 }}>
-            <rect x="4" y="12" width="32" height="22" rx="4" />
-            <circle cx="20" cy="23" r="6" />
-            <path d="M14 12l2.5-4h7L26 12" />
-          </svg>
-          <span style={{
-            fontFamily: "'Montserrat', sans-serif",
-            fontSize: '0.72rem',
-            color: '#888',
-            fontWeight: 500,
-            textAlign: 'center',
-            padding: '0 0.5rem',
-          }}>
-            {label}
-          </span>
-        </>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        style={{
+          width: '100%',
+          aspectRatio: '3/4',
+          borderRadius: '12px',
+          border: errorMsg ? '2px dashed #c0392b' : '2px dashed #bbb8ad',
+          backgroundColor: errorMsg ? '#fff3f3' : 'white',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.5rem',
+          cursor: 'pointer',
+          overflow: 'hidden',
+          position: 'relative',
+          transition: 'border-color 0.2s',
+          padding: 0,
+        }}
+        onMouseEnter={e => {
+          if (!errorMsg) e.currentTarget.style.borderColor = '#1B3022'
+        }}
+        onMouseLeave={e => {
+          if (!errorMsg) e.currentTarget.style.borderColor = '#bbb8ad'
+        }}
+      >
+        {preview ? (
+          <img src={preview} alt={label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        ) : (
+          <>
+            {/* Camera SVG */}
+            <svg viewBox="0 0 40 40" fill="none" stroke={errorMsg ? "#c0392b" : "#999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 36, height: 36 }}>
+              <rect x="4" y="12" width="32" height="22" rx="4" />
+              <circle cx="20" cy="23" r="6" />
+              <path d="M14 12l2.5-4h7L26 12" />
+            </svg>
+            <span style={{
+              fontFamily: "'Montserrat', sans-serif",
+              fontSize: '0.72rem',
+              color: errorMsg ? '#c0392b' : '#888',
+              fontWeight: 500,
+              textAlign: 'center',
+              padding: '0 0.5rem',
+            }}>
+              {label}
+            </span>
+          </>
+        )}
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          capture="environment"
+          onChange={handleChange}
+          style={{ display: 'none' }}
+        />
+      </button>
+      {errorMsg && (
+        <span style={{ color: '#c0392b', fontFamily: "'Montserrat', sans-serif", fontSize: '0.72rem', textAlign: 'center', lineHeight: 1.3 }}>
+          {errorMsg}
+        </span>
       )}
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        onChange={handleChange}
-        style={{ display: 'none' }}
-      />
-    </button>
+    </div>
   )
 }
 
@@ -552,25 +579,45 @@ function StepAccount({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (isSubmitting) return
+
+    // 1. Validaciones
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(form.email)) {
+      setSubmitError('Por favor ingresa un correo electrónico válido.')
+      return
+    }
+
+    const cleanPhone = form.phone.replace(/\D/g, '')
+    if (cleanPhone.length !== 10) {
+      setSubmitError('El número de teléfono debe tener exactamente 10 dígitos.')
+      return
+    }
+
     setIsSubmitting(true)
     setSubmitError('')
 
     try {
-      let { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      // 2. Lógica de Auth: Intentar crear cuenta, si ya existe, intentar login.
+      let { data: authData, error: authError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
       })
 
-      // Si falla porque no existen las credenciales, entonces lo registramos
-      if (authError && authError.message.toLowerCase().includes('invalid login')) {
-         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-           email: form.email,
-           password: form.password,
-         })
-         if (signUpError) throw signUpError
-         authData = signUpData
+      if (authError && authError.message.toLowerCase().includes('already registered')) {
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email: form.email,
+          password: form.password,
+        })
+        if (signInError) {
+          // Lanzamos un error amigable o redirigimos el original
+          if (signInError.message.toLowerCase().includes('invalid login')) {
+            throw new Error("La cuenta asociada a este correo ya existe.")
+          }
+          throw signInError
+        }
+        authData = signInData
       } else if (authError) {
-         throw authError
+        throw authError
       }
 
       const user = authData.user
