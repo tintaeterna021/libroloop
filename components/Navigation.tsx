@@ -28,41 +28,57 @@ export default function Navigation() {
                 <div style={{ display: 'flex', alignItems: 'center', height: '64px', gap: '1rem' }}>
 
                     {/* ── LEFT: Logo ── */}
-                    <Link href="/catalogo" style={{ flexShrink: 0, textDecoration: 'none' }}>
-                        <span style={{
-                            fontFamily: "'Playfair Display', serif",
-                            fontSize: '1.4rem', fontWeight: 900,
-                            color: 'white', letterSpacing: '-0.5px',
-                        }}>
-                            Libroloop
-                        </span>
-                    </Link>
+                    <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+                        <Link href="/" style={{ textDecoration: 'none' }}>
+                            <span style={{
+                                fontFamily: "'Playfair Display', serif",
+                                fontSize: '1.4rem', fontWeight: 900,
+                                color: 'white', letterSpacing: '-0.5px',
+                            }}>
+                                Libroloop
+                            </span>
+                        </Link>
+                    </div>
 
-                    {/* ── ALIGN RIGHT: Nav links ── */}
+                    {/* ── CENTER: Nav links ── */}
                     <div style={{
-                        flex: 1, display: 'flex', justifyContent: 'flex-end',
+                        display: 'flex', justifyContent: 'center',
                         alignItems: 'center',
                         gap: '0.5rem',
                     }}>
-                        <Link href="/catalogo" style={linkStyle('/catalogo')}>
-                            Catálogo
+                        <Link href="/catalogo" style={{
+                            ...linkStyle('/catalogo'),
+                            color: (pathname === '/catalogo' || pathname === '/') ? 'white' : 'rgba(255,255,255,0.72)',
+                            backgroundColor: (pathname === '/catalogo' || pathname === '/') ? 'rgba(255,255,255,0.15)' : 'transparent',
+                        }}>
+                            Comprar
                         </Link>
+                        <Link href="/vender" style={linkStyle('/vender')}>
+                            Vender
+                        </Link>
+                    </div>
+
+                    {/* ── RIGHT: Auth ── */}
+                    <div style={{
+                        flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center'
+                    }}>
                         <Link
-                            href="/vender"
+                            href="/login"
                             style={{
                                 fontFamily: "'Montserrat', sans-serif",
-                                fontSize: '0.875rem',
+                                fontSize: '0.85rem',
                                 fontWeight: 700,
-                                padding: '0.4rem 1rem',
+                                padding: '0.45rem 1.1rem',
                                 borderRadius: '999px',
-                                color: pathname === '/vender' ? '#1B3022' : '#F5F2E7',
-                                backgroundColor: pathname === '/vender' ? '#F5F2E7' : 'transparent',
-                                border: '1.5px solid rgba(255,255,255,0.5)',
+                                color: '#1B3022',
+                                backgroundColor: '#F5F2E7',
                                 textDecoration: 'none',
-                                transition: 'all 0.15s',
+                                transition: 'transform 0.1s',
                             }}
+                            onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.03)')}
+                            onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
                         >
-                            Vender
+                            Inicio de sesión
                         </Link>
                     </div>
                 </div>
