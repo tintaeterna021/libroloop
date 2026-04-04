@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
@@ -558,7 +558,7 @@ function StepUpload({
   )
 }
 
-// ─── Step 3: Account Creation ────────────────────────────────
+// ─── Step 3: Account Creation / Submit ────────────────────
 function StepAccount({
   books,
   onBack,
@@ -573,6 +573,15 @@ function StepAccount({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [form, setForm] = useState({ phone: '', email: '', password: '' })
+  
+  // Guardamos la sesión si existe
+  const [sessionUser, setSessionUser] = useState<any>(null)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setSessionUser(data.session?.user || null)
+    })
+  }, [])
 
   const bookCount = books.length
 
@@ -580,63 +589,69 @@ function StepAccount({
     e.preventDefault()
     if (isSubmitting) return
 
-    // 1. Validaciones
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(form.email)) {
-      setSubmitError('Por favor ingresa un correo electrónico válido.')
-      return
-    }
-
-    const cleanPhone = form.phone.replace(/\D/g, '')
-    if (cleanPhone.length !== 10) {
-      setSubmitError('El número de teléfono debe tener exactamente 10 dígitos.')
-      return
-    }
-
     setIsSubmitting(true)
     setSubmitError('')
 
-    try {
-      // 2. Lógica de Auth: Intentar crear cuenta, si ya existe, intentar login.
-      let { data: authData, error: authError } = await supabase.auth.signUp({
-        email: form.email,
-        password: form.password,
-      })
+    let finalUser = sessionUser
 
-      if (authError && authError.message.toLowerCase().includes('already registered')) {
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+    try {
+      if (!finalUser) {
+        // 1. Validaciones solo para nuevos
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(form.email)) {
+          setSubmitError('Por favor ingresa un correo electrónico válido.')
+          setIsSubmitting(false)
+          return
+        }
+
+        const cleanPhone = form.phone.replace(/\D/g, '')
+        if (cleanPhone.length !== 10) {
+          setSubmitError('El número de teléfono debe tener exactamente 10 dígitos.')
+          setIsSubmitting(false)
+          return
+        }
+
+        // 2. Lógica de Auth: Intentar crear cuenta, si ya existe, intentar login.
+        let { data: authData, error: authError } = await supabase.auth.signUp({
           email: form.email,
           password: form.password,
         })
-        if (signInError) {
-          // Lanzamos un error amigable o redirigimos el original
-          if (signInError.message.toLowerCase().includes('invalid login')) {
-            throw new Error("La cuenta asociada a este correo ya existe.")
+
+        if (authError && authError.message.toLowerCase().includes('already registered')) {
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email: form.email,
+            password: form.password,
+          })
+          if (signInError) {
+            // Lanzamos un error amigable o redirigimos el original
+            if (signInError.message.toLowerCase().includes('invalid login')) {
+              throw new Error("La cuenta asociada a este correo ya existe.")
+            }
+            throw signInError
           }
-          throw signInError
+          authData = signInData
+        } else if (authError) {
+          throw authError
         }
-        authData = signInData
-      } else if (authError) {
-        throw authError
+
+        finalUser = authData.user
+        if (!finalUser) throw new Error("No se pudo obtener el usuario")
+
+        await supabase.from('profiles').upsert({
+          id: finalUser.id,
+          email: form.email,
+          phone: form.phone,
+          name: form.email.split('@')[0],
+        }, { onConflict: 'id' })
       }
-
-      const user = authData.user
-      if (!user) throw new Error("No se pudo obtener el usuario")
-
-      await supabase.from('profiles').upsert({
-        id: user.id,
-        email: form.email,
-        phone: form.phone,
-        name: form.email.split('@')[0],
-      }, { onConflict: 'id' })
 
       for (const book of books) {
         if (!book.coverFile || !book.backFile) continue;
 
         const coverExt = book.coverFile.name.split('.').pop()
         const backExt = book.backFile.name.split('.').pop()
-        const coverFilename = `uploads/${user.id}/${book.id}_cover_${Date.now()}.${coverExt}`
-        const backFilename = `uploads/${user.id}/${book.id}_back_${Date.now()}.${backExt}`
+        const coverFilename = `uploads/${finalUser.id}/${book.id}_cover_${Date.now()}.${coverExt}`
+        const backFilename = `uploads/${finalUser.id}/${book.id}_back_${Date.now()}.${backExt}`
 
         const { error: coverError } = await supabase.storage.from('books').upload(coverFilename, book.coverFile, { upsert: true })
         if (coverError) throw coverError
@@ -648,7 +663,7 @@ function StepAccount({
         const { data: backUrlData } = supabase.storage.from('books').getPublicUrl(backFilename)
 
         const { error: dbError } = await supabase.from('books').insert({
-          user_id: user.id,
+          user_id: finalUser.id,
           original_front_image_url: coverUrlData.publicUrl,
           original_back_image_url: backUrlData.publicUrl,
           status_code: 1,
@@ -739,106 +754,133 @@ function StepAccount({
           ← Regresar al paso anterior
         </button>
 
-        <h2 style={{
-          fontFamily: "'Playfair Display', serif",
-          fontSize: 'clamp(1.8rem, 5vw, 2.5rem)',
-          fontWeight: 900, color: '#1B3022',
-          textAlign: 'center', lineHeight: 1.2,
-          marginBottom: '0.5rem',
-        }}>
-          Crea tu cuenta<br />y envía
-        </h2>
-        <p style={{
-          fontFamily: "'Montserrat', sans-serif",
-          fontSize: '0.85rem', color: '#666',
-          textAlign: 'center', marginBottom: '2rem',
-        }}>
-          {bookCount} libro{bookCount !== 1 ? 's' : ''} listos para enviar
-        </p>
+        {sessionUser ? (
+          <>
+            <h2 style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: 'clamp(1.8rem, 5vw, 2.5rem)',
+              fontWeight: 900, color: '#1B3022',
+              textAlign: 'center', lineHeight: 1.2,
+              marginBottom: '0.5rem',
+            }}>
+              Confirmar envío
+            </h2>
+            <p style={{
+              fontFamily: "'Montserrat', sans-serif",
+              fontSize: '0.85rem', color: '#666',
+              textAlign: 'center', marginBottom: '2rem',
+            }}>
+              Estás a un paso de enviar {bookCount} libro{bookCount !== 1 ? 's' : ''} para revisión.
+            </p>
+          </>
+        ) : (
+          <>
+            <h2 style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: 'clamp(1.8rem, 5vw, 2.5rem)',
+              fontWeight: 900, color: '#1B3022',
+              textAlign: 'center', lineHeight: 1.2,
+              marginBottom: '0.5rem',
+            }}>
+              Crea tu cuenta<br />y envía
+            </h2>
+            <p style={{
+              fontFamily: "'Montserrat', sans-serif",
+              fontSize: '0.85rem', color: '#666',
+              textAlign: 'center', marginBottom: '2rem',
+            }}>
+              {bookCount} libro{bookCount !== 1 ? 's' : ''} listos para enviar
+            </p>
+          </>
+        )}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
-          {/* Phone with prefix */}
-          <div style={{ display: 'flex', gap: '0', borderRadius: '10px', overflow: 'hidden', border: '1.5px solid #dedad2', backgroundColor: '#faf8f2' }}>
-            <div style={{
-              padding: '0.9rem 0.85rem',
-              fontFamily: "'Montserrat', sans-serif",
-              fontWeight: 700,
-              fontSize: '0.95rem',
-              color: '#1B3022',
-              borderRight: '1.5px solid #dedad2',
-              flexShrink: 0,
-              userSelect: 'none',
-            }}>
-              +52
-            </div>
-            <input
-              type="tel"
-              placeholder="Teléfono"
-              value={form.phone}
-              onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-              required
-              style={{
-                flex: 1,
-                padding: '0.9rem 1rem',
-                border: 'none',
-                backgroundColor: 'transparent',
-                fontFamily: "'Montserrat', sans-serif",
-                fontSize: '0.95rem',
-                color: '#1A1A1A',
-                outline: 'none',
-              }}
-            />
-          </div>
+          {!sessionUser && (
+            <>
+              {/* Phone with prefix */}
+              <div style={{ display: 'flex', gap: '0', borderRadius: '10px', overflow: 'hidden', border: '1.5px solid #dedad2', backgroundColor: '#faf8f2' }}>
+                <div style={{
+                  padding: '0.9rem 0.85rem',
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontWeight: 700,
+                  fontSize: '0.95rem',
+                  color: '#1B3022',
+                  borderRight: '1.5px solid #dedad2',
+                  flexShrink: 0,
+                  userSelect: 'none',
+                }}>
+                  +52
+                </div>
+                <input
+                  type="tel"
+                  placeholder="Teléfono"
+                  value={form.phone}
+                  onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                  required
+                  style={{
+                    flex: 1,
+                    padding: '0.9rem 1rem',
+                    border: 'none',
+                    backgroundColor: 'transparent',
+                    fontFamily: "'Montserrat', sans-serif",
+                    fontSize: '0.95rem',
+                    color: '#1A1A1A',
+                    outline: 'none',
+                  }}
+                />
+              </div>
 
-          {/* Email */}
-          <input
-            type="email"
-            placeholder="Correo electrónico"
-            value={form.email}
-            onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-            required
-            style={inputStyle}
-            onFocus={e => (e.target.style.borderColor = '#1B3022')}
-            onBlur={e => (e.target.style.borderColor = '#dedad2')}
-          />
+              {/* Email */}
+              <input
+                type="email"
+                placeholder="Correo electrónico"
+                value={form.email}
+                onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                required
+                style={inputStyle}
+                onFocus={e => (e.target.style.borderColor = '#1B3022')}
+                onBlur={e => (e.target.style.borderColor = '#dedad2')}
+              />
 
-          {/* Password */}
-          <div style={{ position: 'relative' }}>
-            <input
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Contraseña"
-              value={form.password}
-              onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-              required
-              style={{ ...inputStyle, paddingRight: '3rem' }}
-              onFocus={e => (e.target.style.borderColor = '#1B3022')}
-              onBlur={e => (e.target.style.borderColor = '#dedad2')}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(v => !v)}
-              style={{
-                position: 'absolute', right: '0.9rem', top: '50%', transform: 'translateY(-50%)',
-                background: 'none', border: 'none', cursor: 'pointer', padding: '0.2rem',
-                color: '#888', display: 'flex', alignItems: 'center',
-              }}
-              aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-            >
-              {showPassword ? (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 20, height: 20 }}>
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-                  <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-                  <line x1="1" y1="1" x2="23" y2="23" />
-                </svg>
-              ) : (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 20, height: 20 }}>
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
-              )}
-            </button>
-          </div>
+              {/* Password */}
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Contraseña"
+                  value={form.password}
+                  onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                  required
+                  style={{ ...inputStyle, paddingRight: '3rem' }}
+                  onFocus={e => (e.target.style.borderColor = '#1B3022')}
+                  onBlur={e => (e.target.style.borderColor = '#dedad2')}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  style={{
+                    position: 'absolute', right: '0.9rem', top: '50%', transform: 'translateY(-50%)',
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '0.2rem',
+                    color: '#888', display: 'flex', alignItems: 'center',
+                  }}
+                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                >
+                  {showPassword ? (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 20, height: 20 }}>
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 20, height: 20 }}>
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </>
+          )}
 
           {/* Error Message */}
           {submitError && (
@@ -871,7 +913,7 @@ function StepAccount({
               onMouseDown={e => (e.currentTarget.style.transform = 'scale(0.98)')}
               onMouseUp={e => (e.currentTarget.style.transform = 'scale(1)')}
             >
-              {isSubmitting ? 'PROCESANDO...' : 'CREAR CUENTA Y ENVIAR LIBROS'}
+              {isSubmitting ? 'PROCESANDO...' : (sessionUser ? 'CONFIRMAR Y ENVIAR LIBROS' : 'CREAR CUENTA Y ENVIAR LIBROS')}
             </button>
             <p style={{
               fontFamily: "'Montserrat', sans-serif",

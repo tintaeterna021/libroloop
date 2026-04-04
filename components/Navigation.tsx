@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
 
 export default function Navigation() {
     const pathname = usePathname()
@@ -17,6 +19,22 @@ export default function Navigation() {
         textDecoration: 'none',
         transition: 'all 0.15s',
     })
+
+    const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+    useEffect(() => {
+        // Chequeo inicial
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setIsLoggedIn(!!session)
+        })
+
+        // Escuchar cambios (login, logout)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setIsLoggedIn(!!session)
+        })
+
+        return () => subscription.unsubscribe()
+    }, [])
 
     return (
         <nav style={{
@@ -46,40 +64,82 @@ export default function Navigation() {
                         alignItems: 'center',
                         gap: '0.5rem',
                     }}>
-                        <Link href="/catalogo" style={{
-                            ...linkStyle('/catalogo'),
-                            color: (pathname === '/catalogo' || pathname === '/') ? 'white' : 'rgba(255,255,255,0.72)',
-                            backgroundColor: (pathname === '/catalogo' || pathname === '/') ? 'rgba(255,255,255,0.15)' : 'transparent',
-                        }}>
-                            Comprar
-                        </Link>
-                        <Link href="/vender" style={linkStyle('/vender')}>
-                            Vender
-                        </Link>
+                        {!isLoggedIn ? (
+                            <>
+                                <Link href="/catalogo" style={{
+                                    ...linkStyle('/catalogo'),
+                                    color: (pathname === '/catalogo' || pathname === '/') ? 'white' : 'rgba(255,255,255,0.72)',
+                                    backgroundColor: (pathname === '/catalogo' || pathname === '/') ? 'rgba(255,255,255,0.15)' : 'transparent',
+                                }}>
+                                    Comprar
+                                </Link>
+                                <Link href="/vender" style={linkStyle('/vender')}>
+                                    Vender
+                                </Link>
+                            </>
+                        ) : (
+                            <>
+                                <Link href="/catalogo" style={{
+                                    ...linkStyle('/catalogo'),
+                                    color: (pathname === '/catalogo' || pathname === '/') ? 'white' : 'rgba(255,255,255,0.72)',
+                                    backgroundColor: (pathname === '/catalogo' || pathname === '/') ? 'rgba(255,255,255,0.15)' : 'transparent',
+                                }}>
+                                    Catálogo
+                                </Link>
+                                <Link href="/mis-compras" style={linkStyle('/mis-compras')}>
+                                    Mis compras
+                                </Link>
+                                <Link href="/ventas" style={linkStyle('/ventas')}>
+                                    Ventas
+                                </Link>
+                            </>
+                        )}
                     </div>
 
                     {/* ── RIGHT: Auth ── */}
                     <div style={{
                         flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center'
                     }}>
-                        <Link
-                            href="/login"
-                            style={{
-                                fontFamily: "'Montserrat', sans-serif",
-                                fontSize: '0.85rem',
-                                fontWeight: 700,
-                                padding: '0.45rem 1.1rem',
-                                borderRadius: '999px',
-                                color: '#1B3022',
-                                backgroundColor: '#F5F2E7',
-                                textDecoration: 'none',
-                                transition: 'transform 0.1s',
-                            }}
-                            onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.03)')}
-                            onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
-                        >
-                            Inicio de sesión
-                        </Link>
+                        {!isLoggedIn ? (
+                            <Link
+                                href="/login"
+                                style={{
+                                    fontFamily: "'Montserrat', sans-serif",
+                                    fontSize: '0.85rem',
+                                    fontWeight: 700,
+                                    padding: '0.45rem 1.1rem',
+                                    borderRadius: '999px',
+                                    color: '#1B3022',
+                                    backgroundColor: '#F5F2E7',
+                                    textDecoration: 'none',
+                                    transition: 'transform 0.1s',
+                                }}
+                                onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.03)')}
+                                onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+                            >
+                                Inicio de sesión
+                            </Link>
+                        ) : (
+                            <Link
+                                href="/cuenta"
+                                style={{
+                                    fontFamily: "'Montserrat', sans-serif",
+                                    fontSize: '0.85rem',
+                                    fontWeight: 700,
+                                    padding: '0.45rem 1.1rem',
+                                    borderRadius: '999px',
+                                    color: '#1B3022',
+                                    backgroundColor: '#ebf4ec',
+                                    border: '1.5px solid #a8c4af',
+                                    textDecoration: 'none',
+                                    transition: 'transform 0.1s',
+                                }}
+                                onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.03)')}
+                                onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+                            >
+                                Mi cuenta
+                            </Link>
+                        )}
                     </div>
                 </div>
             </div>
