@@ -51,7 +51,7 @@ export default function BookDetailPage() {
                     <h1 style={{ fontFamily: "'Playfair Display', serif", color: '#1A1A1A', fontSize: '1.8rem', margin: '1rem 0' }}>
                         Libro no encontrado
                     </h1>
-                    <Link href="/" style={{ color: '#1B3022', fontFamily: "'Montserrat', sans-serif", fontWeight: 600 }}>
+                    <Link href="/catalogo" style={{ color: '#1B3022', fontFamily: "'Montserrat', sans-serif", fontWeight: 600 }}>
                         ← Volver al catálogo
                     </Link>
                 </div>
@@ -65,7 +65,7 @@ export default function BookDetailPage() {
             {/* Back link */}
             <div style={{ padding: '1rem 1rem 0', maxWidth: '900px', margin: '0 auto' }}>
                 <Link
-                    href="/"
+                    href="/catalogo"
                     style={{ fontFamily: "'Montserrat', sans-serif", color: '#1B3022', fontWeight: 600, fontSize: '0.85rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
                 >
                     ← Volver al catálogo

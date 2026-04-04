@@ -1,1 +1,7 @@
-revisar status libros vendedor
+botón vender, movil y web
+menú hamburguesa móvil
+secciones hasta arriba móvil
+
+quitar autor solo nombre libro
+regresar a catálogo
+subir imágenes

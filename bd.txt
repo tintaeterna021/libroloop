@@ -34,7 +34,6 @@ books
 - publisher
 - isbn
 - genre
-- publication_date
 - language
 - page_count
 - description
