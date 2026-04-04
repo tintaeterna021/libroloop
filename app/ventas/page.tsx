@@ -70,11 +70,8 @@ export default function MisVentasPage() {
         )
       case 2:
         return (
-          <div style={{ backgroundColor: '#f8d7da', color: '#721c24', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+          <div style={{ backgroundColor: '#f8d7da', color: '#721c24', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-block' }}>
             ❌ No Aprobado
-            {book.rejection_comment && (
-              <span title={book.rejection_comment} style={{ cursor: 'help', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#721c24', color: '#f8d7da', borderRadius: '50%', width: '14px', height: '14px', fontSize: '0.65rem' }}>i</span>
-            )}
           </div>
         )
       case 5:
@@ -111,13 +108,13 @@ export default function MisVentasPage() {
     }
   }
 
-  const renderStatusDesc = (status_code: number) => {
-    switch (status_code) {
+  const renderStatusDesc = (book: SellerBook) => {
+    switch (book.status_code) {
       case 1: return "Estamos analizando las fotos (Máx 24 hrs)."
       case 5: return "Tu libro ya está disponible en nuestro catálogo para todos."
       case 9: return "Este libro ya tiene nuevo dueño. Tu saldo se actualizará en tu próximo corte."
       case 10: return "El pago por este ejemplar ya fue transferido a tu cuenta."
-      case 2: return "No cumple con nuestros criterios de calidad o año de edición."
+      case 2: return book.rejection_comment || "No cumple con nuestros criterios de calidad o año de edición."
       default: return null
     }
   }
@@ -197,18 +194,15 @@ export default function MisVentasPage() {
 
                 {/* Details */}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.3rem', color: '#1B3022', margin: '0 0 0.2rem 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.3rem', color: '#1B3022', margin: '0 0 1rem 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {book.title || 'Libro En Revisión'}
                   </h3>
-                  <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.9rem', color: '#888', margin: '0 0 1rem 0' }}>
-                    {book.author || 'Sin autor'}
-                  </p>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-start' }}>
                     {renderStatusBadge(book)}
-                    {renderStatusDesc(book.status_code) && (
+                    {renderStatusDesc(book) && (
                       <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.8rem', color: '#777', margin: 0, fontStyle: 'italic', maxWidth: '400px' }}>
-                        {renderStatusDesc(book.status_code)}
+                        {renderStatusDesc(book)}
                       </p>
                     )}
                   </div>
