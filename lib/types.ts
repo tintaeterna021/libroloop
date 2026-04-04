@@ -55,15 +55,22 @@ export interface Book {
     publisher?: string
     isbn?: string
     genre?: string
-    publication_date?: string
     language?: string
     page_count?: number
     description?: string
+    link_amazon?: string
+    link_sotano?: string
+    link_buscalibre?: string
+    link_gandhi?: string
     publish_front_image_url?: string
     publish_back_image_url?: string
     original_price: number
     sale_price: number
     status_code: number
+    rejection_comment?: string
+    review_at?: string
+    rejected_at?: string
+    accepted_at?: string
     created_at: string
 }
 
