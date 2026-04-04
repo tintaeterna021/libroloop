@@ -164,7 +164,6 @@ export default function BookDetailPage() {
                                 { icon: '🏢', label: 'Editorial', value: book.publisher },
                                 { icon: '🔢', label: 'ISBN', value: book.isbn },
                                 { icon: '📖', label: 'Género', value: book.genre },
-                                { icon: '📅', label: 'Publicación', value: book.publication_date },
                                 { icon: '🗣️', label: 'Idioma', value: book.language },
                                 { icon: '📄', label: 'Páginas', value: book.page_count?.toString() },
                             ].filter(r => r.value).map(row => (
