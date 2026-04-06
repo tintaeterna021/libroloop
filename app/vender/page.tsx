@@ -252,9 +252,9 @@ function PhotoSlot({
       return
     }
 
-    const maxSizeInBytes = 2 * 1024 * 1024 // 2 MB
+    const maxSizeInBytes = 3 * 1024 * 1024 // 3 MB
     if (file.size > maxSizeInBytes) {
-      setErrorMsg(`La foto pesa ${(file.size / 1024 / 1024).toFixed(2)} MB. El límite es 2 MB.`)
+      setErrorMsg(`La foto pesa ${(file.size / 1024 / 1024).toFixed(2)} MB. El límite es 3 MB.`)
       return
     }
 
@@ -317,7 +317,6 @@ function PhotoSlot({
           ref={inputRef}
           type="file"
           accept="image/jpeg,image/png,image/webp"
-          capture="environment"
           onChange={handleChange}
           style={{ display: 'none' }}
         />

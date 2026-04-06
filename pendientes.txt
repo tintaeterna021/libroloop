@@ -2,6 +2,10 @@ botón vender, movil y web
 menú hamburguesa móvil
 secciones hasta arriba móvil
 
-quitar autor solo nombre libro
-regresar a catálogo
-subir imágenes
+cálculo precio mínimo
+subir imágenes para publicar
+
+publicar imágenes más pesadas
+publicar imgs ya guardadas
+
+login admon
