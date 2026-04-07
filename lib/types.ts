@@ -71,6 +71,7 @@ export interface Book {
     review_at?: string
     rejected_at?: string
     accepted_at?: string
+    extra_discount_percent?: number
     created_at: string
 }
 

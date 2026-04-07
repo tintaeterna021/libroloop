@@ -192,12 +192,14 @@ export default function CatalogoPage() {
     // Filters applied to the query
     const [appliedFilters, setAppliedFilters] = useState({
         categories: [] as string[],
-        priceRange: [PRICE_MIN, PRICE_MAX] as [number, number]
+        priceRange: [PRICE_MIN, PRICE_MAX] as [number, number],
+        onlyWithDiscount: false
     })
 
     // Temporary filters in the UI
     const [tempCategories, setTempCategories] = useState<string[]>([])
     const [tempPriceRange, setTempPriceRange] = useState<[number, number]>([PRICE_MIN, PRICE_MAX])
+    const [tempOnlyWithDiscount, setTempOnlyWithDiscount] = useState(false)
     
     const [filtersOpen, setFiltersOpen] = useState(false)
 
@@ -223,6 +225,11 @@ export default function CatalogoPage() {
 
             // Price filter
             query = query.gte('sale_price', appliedFilters.priceRange[0]).lte('sale_price', appliedFilters.priceRange[1])
+
+            // Extra discount filter
+            if (appliedFilters.onlyWithDiscount) {
+                query = query.gt('extra_discount_percent', 0)
+            }
 
             // Search
             if (searchTerm) {
@@ -275,7 +282,8 @@ export default function CatalogoPage() {
     const handleApplyFilters = () => {
         setAppliedFilters({
             categories: tempCategories,
-            priceRange: tempPriceRange
+            priceRange: tempPriceRange,
+            onlyWithDiscount: tempOnlyWithDiscount
         })
         setFiltersOpen(false)
     }
@@ -289,13 +297,18 @@ export default function CatalogoPage() {
     const handleClearFilters = () => {
         setTempCategories([])
         setTempPriceRange([PRICE_MIN, PRICE_MAX])
+        setTempOnlyWithDiscount(false)
         setAppliedFilters({
             categories: [],
-            priceRange: [PRICE_MIN, PRICE_MAX]
+            priceRange: [PRICE_MIN, PRICE_MAX],
+            onlyWithDiscount: false
         })
     }
 
-    const anyFilterApplied = appliedFilters.categories.length > 0 || appliedFilters.priceRange[0] !== PRICE_MIN || appliedFilters.priceRange[1] !== PRICE_MAX
+    const anyFilterApplied = appliedFilters.categories.length > 0 || 
+                             appliedFilters.priceRange[0] !== PRICE_MIN || 
+                             appliedFilters.priceRange[1] !== PRICE_MAX ||
+                             appliedFilters.onlyWithDiscount
 
     return (
         <div style={{ backgroundColor: '#F5F2E7', minHeight: '100vh' }}>
@@ -336,6 +349,7 @@ export default function CatalogoPage() {
                                 if (!filtersOpen) {
                                     setTempCategories(appliedFilters.categories)
                                     setTempPriceRange(appliedFilters.priceRange)
+                                    setTempOnlyWithDiscount(appliedFilters.onlyWithDiscount)
                                 }
                                 setFiltersOpen(f => !f)
                             }}
@@ -426,6 +440,28 @@ export default function CatalogoPage() {
                                     values={tempPriceRange}
                                     onChange={setTempPriceRange}
                                 />
+                            </div>
+
+                            {/* Extra Discount Toggle */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0' }}>
+                                <label style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '0.6rem', 
+                                    cursor: 'pointer',
+                                    fontFamily: "'Montserrat', sans-serif",
+                                    fontSize: '0.85rem',
+                                    fontWeight: 600,
+                                    color: '#1B3022'
+                                }}>
+                                    <input 
+                                        type="checkbox" 
+                                        checked={tempOnlyWithDiscount}
+                                        onChange={e => setTempOnlyWithDiscount(e.target.checked)}
+                                        style={{ width: '18px', height: '18px', accentColor: '#1B3022', cursor: 'pointer' }}
+                                    />
+                                    Solo libros con descuento adicional
+                                </label>
                             </div>
 
                             {/* Actions */}
