@@ -1,6 +1,7 @@
 botón vender, movil y web
 menú hamburguesa móvil
-recomendaciones en detalle
+
+añadir
 carrito
 
 login admon

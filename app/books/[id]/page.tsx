@@ -9,6 +9,7 @@ import Link from 'next/link'
 export default function BookDetailPage() {
     const params = useParams()
     const [book, setBook] = useState<Book | null>(null)
+    const [recommendations, setRecommendations] = useState<Book[]>([])
     const [loading, setLoading] = useState(true)
     const [activeImage, setActiveImage] = useState<'cover'|'back'>('cover')
 
@@ -25,10 +26,29 @@ export default function BookDetailPage() {
                 .single()
             if (error) throw error
             setBook(data)
+            if (data?.genre) {
+                fetchRecommendations(data.id, data.genre)
+            }
         } catch (err) {
             console.error(err)
         } finally {
             setLoading(false)
+        }
+    }
+
+    async function fetchRecommendations(currentId: string, genre: string) {
+        try {
+            const { data, error } = await supabase
+                .from('books')
+                .select('*')
+                .eq('genre', genre)
+                .eq('status_code', 6)
+                .neq('id', currentId)
+                .limit(4)
+            if (error) throw error
+            setRecommendations(data || [])
+        } catch (err) {
+            console.warn('Error fetching recommendations:', err)
         }
     }
 
@@ -189,6 +209,64 @@ export default function BookDetailPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Recommendations Section */}
+            {recommendations.length > 0 && (
+                <div style={{ maxWidth: '1100px', margin: '2rem auto 0', padding: '0 1rem' }}>
+                    <h2 style={{ 
+                        fontFamily: "'Playfair Display', serif", 
+                        fontSize: '1.5rem', 
+                        fontWeight: 700, 
+                        color: '#1A1A1A', 
+                        marginBottom: '1.25rem',
+                        paddingBottom: '0.5rem',
+                        borderBottom: '2px solid #e0ddd2'
+                    }}>
+                        Libros similares
+                    </h2>
+                    <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', 
+                        gap: '1rem' 
+                    }}>
+                        {recommendations.map(rec => (
+                            <Link href={`/books/${rec.id}`} key={rec.id} style={{ textDecoration: 'none', display: 'block' }}>
+                                <div style={{ aspectRatio: '3/4', background: '#e8e4d8', overflow: 'hidden', borderRadius: '8px' }}>
+                                    {rec.publish_front_image_url ? (
+                                        <img src={rec.publish_front_image_url} alt={rec.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    ) : (
+                                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem' }}>📚</div>
+                                    )}
+                                </div>
+                                <div style={{ padding: '0.6rem 0' }}>
+                                    <h4 style={{ 
+                                        fontFamily: "'Playfair Display', serif", 
+                                        color: '#1A1A1A', 
+                                        fontSize: '0.88rem', 
+                                        fontWeight: 700, 
+                                        lineHeight: 1.3, 
+                                        marginBottom: '0.1rem',
+                                        display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' 
+                                    }}>
+                                        {rec.title}
+                                    </h4>
+                                    <p style={{ color: '#777', fontSize: '0.72rem', marginBottom: '0.4rem', fontFamily: "'Montserrat', sans-serif" }}>
+                                        {rec.author}
+                                    </p>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <span style={{ textDecoration: 'line-through', color: '#aaa', fontSize: '0.7rem' }}>
+                                            ${Number(rec.original_price).toFixed(0)}
+                                        </span>
+                                        <span style={{ color: '#1B3022', fontWeight: 700, fontSize: '0.9rem', fontFamily: "'Montserrat', sans-serif" }}>
+                                            ${Number(rec.sale_price).toFixed(0)}
+                                        </span>
+                                    </div>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            )}
 
         </div>
     )
