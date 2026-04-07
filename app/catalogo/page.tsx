@@ -5,16 +5,182 @@ import { supabase } from '@/lib/supabase'
 import { Book } from '@/lib/types'
 import Link from 'next/link'
 
-const FILTERS = [
-    { label: 'Todos', value: '' },
-    { label: 'Ficción', value: 'ficcion' },
-    { label: 'Desarrollo Personal', value: 'desarrollo-personal' },
-    { label: 'Clásicos', value: 'clasicos' },
-    { label: 'Recién Llegados', value: '__new' },
-    { label: '< $200', value: '__under200' },
+const CATEGORIES = [
+    { value: "Ficción", label: "Ficción" },
+    { value: "Ficción juvenil", label: "Ficción juvenil" },
+    { value: "Autoayuda", label: "Autoayuda" },
+    { value: "Religión", label: "Religión" },
+    { value: "Salud y estado físico", label: "Salud y estado físico" },
+    { value: "Medicina", label: "Medicina" },
+    { value: "Computación", label: "Computación" },
+    { value: "Tecnología e ingeniería", label: "Tecnología e ingeniería" },
+    { value: "Negocios y economía", label: "Negocios y economía" },
+    { value: "Educación", label: "Educación" },
+    { value: "Historia", label: "Historia" },
+    { value: "Arte", label: "Arte" },
+    { value: "Ciencia", label: "Ciencia" },
+    { value: "Matemáticas", label: "Matemáticas" },
+    { value: "Filosofía", label: "Filosofía" },
+    { value: "Psicología", label: "Psicología" },
+    { value: "Ciencias sociales", label: "Ciencias sociales" },
+    { value: "Biografía y autobiografía", label: "Biografía y autobiografía" },
+    { value: "Poesía", label: "Poesía" },
+    { value: "Drama", label: "Drama" },
+    { value: "Derecho", label: "Derecho" },
+    { value: "Música", label: "Música" },
+    { value: "Deportes y recreación", label: "Deportes y recreación" },
+    { value: "Viajes", label: "Viajes" },
+    { value: "Cocina", label: "Cocina" },
+    { value: "Ayudas de estudio", label: "Ayudas de estudio" },
+    { value: "Estudio de idiomas", label: "Estudio de idiomas" }
 ]
 
+const PRICE_MIN = 0
+const PRICE_MAX = 2000
 const PAGE_SIZE = 12
+
+// ─── Custom dual-handle range slider ────────────────────────────────────────
+function PriceRangeSlider({
+    min, max, values, onChange,
+}: {
+    min: number; max: number; values: [number, number]; onChange: (v: [number, number]) => void
+}) {
+    const trackRef = useRef<HTMLDivElement>(null)
+    const dragging = useRef<null | 'left' | 'right'>(null)
+
+    const toPercent = (v: number) => ((v - min) / (max - min)) * 100
+
+    const fromClientX = (clientX: number): number => {
+        const rect = trackRef.current!.getBoundingClientRect()
+        const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
+        return Math.round(min + ratio * (max - min))
+    }
+
+    const handleMouseDown = (handle: 'left' | 'right') => (e: React.MouseEvent) => {
+        e.preventDefault()
+        dragging.current = handle
+    }
+
+    const handleTouchStart = (handle: 'left' | 'right') => (e: React.TouchEvent) => {
+        dragging.current = handle
+    }
+
+    useEffect(() => {
+        const move = (clientX: number) => {
+            if (!dragging.current || !trackRef.current) return
+            const val = fromClientX(clientX)
+            if (dragging.current === 'left') {
+                onChange([Math.min(val, values[1] - 50), values[1]])
+            } else {
+                onChange([values[0], Math.max(val, values[0] + 50)])
+            }
+        }
+
+        const onMouseMove = (e: MouseEvent) => move(e.clientX)
+        const onTouchMove = (e: TouchEvent) => move(e.touches[0].clientX)
+        const onUp = () => { dragging.current = null }
+
+        window.addEventListener('mousemove', onMouseMove)
+        window.addEventListener('mouseup', onUp)
+        window.addEventListener('touchmove', onTouchMove)
+        window.addEventListener('touchend', onUp)
+        return () => {
+            window.removeEventListener('mousemove', onMouseMove)
+            window.removeEventListener('mouseup', onUp)
+            window.removeEventListener('touchmove', onTouchMove)
+            window.removeEventListener('touchend', onUp)
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [values])
+
+    const leftPct  = toPercent(values[0])
+    const rightPct = toPercent(values[1])
+
+    return (
+        <div style={{ padding: '0.5rem 0 0.25rem' }}>
+            {/* Labels */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
+                <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.78rem', fontWeight: 700, color: '#1B3022' }}>
+                    ${values[0].toLocaleString('es-MX')}
+                </span>
+                <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.75rem', color: '#999' }}>
+                    Precio
+                </span>
+                <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.78rem', fontWeight: 700, color: '#1B3022' }}>
+                    ${values[1].toLocaleString('es-MX')}
+                </span>
+            </div>
+
+            {/* Track */}
+            <div
+                ref={trackRef}
+                style={{
+                    position: 'relative',
+                    height: '6px',
+                    borderRadius: '999px',
+                    backgroundColor: '#e0ddd2',
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                }}
+            >
+                {/* Active range */}
+                <div style={{
+                    position: 'absolute',
+                    left: `${leftPct}%`,
+                    right: `${100 - rightPct}%`,
+                    top: 0, bottom: 0,
+                    backgroundColor: '#1B3022',
+                    borderRadius: '999px',
+                }} />
+
+                {/* Left handle */}
+                <div
+                    onMouseDown={handleMouseDown('left')}
+                    onTouchStart={handleTouchStart('left')}
+                    style={{
+                        position: 'absolute',
+                        left: `${leftPct}%`,
+                        top: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '20px',
+                        height: '20px',
+                        borderRadius: '50%',
+                        backgroundColor: 'white',
+                        border: '2.5px solid #1B3022',
+                        cursor: 'grab',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.18)',
+                        zIndex: 2,
+                        touchAction: 'none',
+                        transition: 'box-shadow 0.15s',
+                    }}
+                />
+
+                {/* Right handle */}
+                <div
+                    onMouseDown={handleMouseDown('right')}
+                    onTouchStart={handleTouchStart('right')}
+                    style={{
+                        position: 'absolute',
+                        left: `${rightPct}%`,
+                        top: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '20px',
+                        height: '20px',
+                        borderRadius: '50%',
+                        backgroundColor: 'white',
+                        border: '2.5px solid #1B3022',
+                        cursor: 'grab',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.18)',
+                        zIndex: 2,
+                        touchAction: 'none',
+                        transition: 'box-shadow 0.15s',
+                    }}
+                />
+            </div>
+        </div>
+    )
+}
+// ────────────────────────────────────────────────────────────────────────────
 
 export default function CatalogoPage() {
     const [books, setBooks] = useState<Book[]>([])
@@ -22,11 +188,22 @@ export default function CatalogoPage() {
     const [loadingMore, setLoadingMore] = useState(false)
     const [hasMore, setHasMore] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
-    const [activeFilter, setActiveFilter] = useState('')
-    const [addedId, setAddedId] = useState<string | null>(null)
+    
+    // Filters applied to the query
+    const [appliedFilters, setAppliedFilters] = useState({
+        categories: [] as string[],
+        priceRange: [PRICE_MIN, PRICE_MAX] as [number, number]
+    })
+
+    // Temporary filters in the UI
+    const [tempCategories, setTempCategories] = useState<string[]>([])
+    const [tempPriceRange, setTempPriceRange] = useState<[number, number]>([PRICE_MIN, PRICE_MAX])
+    
+    const [filtersOpen, setFiltersOpen] = useState(false)
+
     const observerRef = useRef<IntersectionObserver | null>(null)
-    const loaderRef = useRef<HTMLDivElement | null>(null)
-    const pageRef = useRef(0)
+    const loaderRef   = useRef<HTMLDivElement | null>(null)
+    const pageRef     = useRef(0)
     const isFetchingRef = useRef(false)
 
     const fetchBooks = useCallback(async (reset = false) => {
@@ -39,15 +216,15 @@ export default function CatalogoPage() {
         try {
             let query = supabase.from('books').select('*').eq('status_code', 6)
 
-            if (activeFilter === '__new') {
-                const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-                query = query.gte('created_at', sevenDaysAgo)
-            } else if (activeFilter === '__under200') {
-                query = query.lte('sale_price', 200)
-            } else if (activeFilter) {
-                query = query.eq('genre', activeFilter)
+            // Category multiselect filter (OR logic via .in)
+            if (appliedFilters.categories.length > 0) {
+                query = query.in('genre', appliedFilters.categories)
             }
 
+            // Price filter
+            query = query.gte('sale_price', appliedFilters.priceRange[0]).lte('sale_price', appliedFilters.priceRange[1])
+
+            // Search
             if (searchTerm) {
                 query = query.or(`title.ilike.%${searchTerm}%,author.ilike.%${searchTerm}%`)
             }
@@ -76,15 +253,13 @@ export default function CatalogoPage() {
             setLoadingMore(false)
             isFetchingRef.current = false
         }
-    }, [activeFilter, searchTerm])
+    }, [appliedFilters, searchTerm])
 
-    // Fetch on mount and when filters change
     useEffect(() => {
         fetchBooks(true)
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeFilter, searchTerm])
+    }, [appliedFilters, searchTerm])
 
-    // Infinite scroll
     useEffect(() => {
         if (observerRef.current) observerRef.current.disconnect()
         observerRef.current = new IntersectionObserver(entries => {
@@ -97,53 +272,202 @@ export default function CatalogoPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fetchBooks])
 
+    const handleApplyFilters = () => {
+        setAppliedFilters({
+            categories: tempCategories,
+            priceRange: tempPriceRange
+        })
+        setFiltersOpen(false)
+    }
+
+    const handleToggleCategory = (val: string) => {
+        setTempCategories(prev => 
+            prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val]
+        )
+    }
+
+    const handleClearFilters = () => {
+        setTempCategories([])
+        setTempPriceRange([PRICE_MIN, PRICE_MAX])
+        setAppliedFilters({
+            categories: [],
+            priceRange: [PRICE_MIN, PRICE_MAX]
+        })
+    }
+
+    const anyFilterApplied = appliedFilters.categories.length > 0 || appliedFilters.priceRange[0] !== PRICE_MIN || appliedFilters.priceRange[1] !== PRICE_MAX
 
     return (
         <div style={{ backgroundColor: '#F5F2E7', minHeight: '100vh' }}>
 
-            {/* Sticky header: search + pills */}
+            {/* Sticky header */}
             <div style={{ position: 'sticky', top: '64px', zIndex: 40 }}>
 
-                {/* Search bar */}
+                {/* Search + filter button */}
                 <div style={{ backgroundColor: '#1B3022', padding: '0.85rem 1rem' }}>
-                    <div style={{ maxWidth: '600px', margin: '0 auto', position: 'relative' }}>
-                        <input
-                            type="text"
-                            placeholder="Busca por título, autor o ISBN..."
-                            value={searchTerm}
-                            onChange={e => setSearchTerm(e.target.value)}
-                            style={{
-                                width: '100%',
-                                padding: '0.75rem 1rem 0.75rem 2.8rem',
-                                borderRadius: '999px',
-                                border: 'none',
-                                fontFamily: "'Montserrat', sans-serif",
-                                fontSize: '0.9rem',
-                                outline: 'none',
-                                backgroundColor: 'white',
-                                color: '#1A1A1A',
-                                boxSizing: 'border-box',
+                    <div style={{ maxWidth: '700px', margin: '0 auto', display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                        {/* Search */}
+                        <div style={{ flex: 1, position: 'relative' }}>
+                            <input
+                                type="text"
+                                placeholder="Busca por título, autor o ISBN..."
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem 1rem 0.75rem 2.8rem',
+                                    borderRadius: '999px',
+                                    border: 'none',
+                                    fontFamily: "'Montserrat', sans-serif",
+                                    fontSize: '0.9rem',
+                                    outline: 'none',
+                                    backgroundColor: 'white',
+                                    color: '#1A1A1A',
+                                    boxSizing: 'border-box',
+                                }}
+                            />
+                            <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', fontSize: '0.95rem' }}>🔍</span>
+                        </div>
+
+                        {/* Filters toggle button */}
+                        <button
+                            onClick={() => {
+                                // When opening, sync temp filters with applied ones
+                                if (!filtersOpen) {
+                                    setTempCategories(appliedFilters.categories)
+                                    setTempPriceRange(appliedFilters.priceRange)
+                                }
+                                setFiltersOpen(f => !f)
                             }}
-                        />
-                        <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }}>🔍</span>
+                            style={{
+                                flexShrink: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.4rem',
+                                backgroundColor: anyFilterApplied ? 'white' : 'rgba(255,255,255,0.15)',
+                                color: anyFilterApplied ? '#1B3022' : 'white',
+                                border: anyFilterApplied ? '2px solid white' : '2px solid rgba(255,255,255,0.35)',
+                                padding: '0.55rem 1rem',
+                                borderRadius: '999px',
+                                fontFamily: "'Montserrat', sans-serif",
+                                fontWeight: 700,
+                                fontSize: '0.82rem',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+                                <path d="M1 3h14M3.5 8h9M6 13h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                            </svg>
+                            Filtros
+                            {anyFilterApplied && (
+                                <span style={{
+                                    width: '7px', height: '7px', borderRadius: '50%',
+                                    backgroundColor: '#1B3022', marginLeft: '2px',
+                                }} />
+                            )}
+                        </button>
                     </div>
                 </div>
 
-                {/* Filter pills */}
-                <div style={{ backgroundColor: '#F5F2E7', borderBottom: '1px solid #e0ddd2', padding: '0.65rem 1rem' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: '3px' }}>
-                        {FILTERS.map(f => (
-                            <button
-                                key={f.value}
-                                onClick={() => setActiveFilter(f.value)}
-                                className="pill"
-                                style={activeFilter === f.value ? { backgroundColor: '#1B3022', color: 'white' } : {}}
-                            >
-                                {f.label}
-                            </button>
-                        ))}
+                {/* Filter panel (expandable) */}
+                {filtersOpen && (
+                    <div style={{
+                        backgroundColor: '#fff',
+                        borderBottom: '1px solid #e0ddd2',
+                        padding: '1rem 1.25rem 1.25rem',
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+                    }}>
+                        <div style={{ maxWidth: '700px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+
+                            {/* Categories */}
+                            <div>
+                                <p style={{
+                                    fontFamily: "'Montserrat', sans-serif",
+                                    fontSize: '0.72rem', fontWeight: 700, color: '#999',
+                                    textTransform: 'uppercase', letterSpacing: '0.07em',
+                                    marginBottom: '0.6rem',
+                                }}>Categoría (Selecciona una o más)</p>
+                                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', maxHeight: '200px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+                                    {CATEGORIES.map(cat => (
+                                        <button
+                                            key={cat.value}
+                                            onClick={() => handleToggleCategory(cat.value)}
+                                            style={{
+                                                padding: '0.35rem 0.85rem',
+                                                borderRadius: '999px',
+                                                border: tempCategories.includes(cat.value) ? '2px solid #1B3022' : '1.5px solid #dedad2',
+                                                backgroundColor: tempCategories.includes(cat.value) ? '#1B3022' : 'transparent',
+                                                color: tempCategories.includes(cat.value) ? 'white' : '#333',
+                                                fontFamily: "'Montserrat', sans-serif",
+                                                fontSize: '0.78rem',
+                                                fontWeight: 600,
+                                                cursor: 'pointer',
+                                                transition: 'all 0.15s',
+                                            }}
+                                        >
+                                            {cat.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Price range slider */}
+                            <div>
+                                <p style={{
+                                    fontFamily: "'Montserrat', sans-serif",
+                                    fontSize: '0.72rem', fontWeight: 700, color: '#999',
+                                    textTransform: 'uppercase', letterSpacing: '0.07em',
+                                    marginBottom: '0.4rem',
+                                }}>Rango de Precio</p>
+                                <PriceRangeSlider
+                                    min={PRICE_MIN}
+                                    max={PRICE_MAX}
+                                    values={tempPriceRange}
+                                    onChange={setTempPriceRange}
+                                />
+                            </div>
+
+                            {/* Actions */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
+                                <button
+                                    onClick={handleClearFilters}
+                                    style={{
+                                        fontFamily: "'Montserrat', sans-serif",
+                                        fontSize: '0.78rem',
+                                        fontWeight: 700,
+                                        color: '#999',
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        textDecoration: 'underline',
+                                        padding: 0,
+                                    }}
+                                >
+                                    Limpiar todos
+                                </button>
+                                
+                                <button
+                                    onClick={handleApplyFilters}
+                                    style={{
+                                        backgroundColor: '#1B3022',
+                                        color: 'white',
+                                        border: 'none',
+                                        padding: '0.75rem 2rem',
+                                        borderRadius: '999px',
+                                        fontFamily: "'Montserrat', sans-serif",
+                                        fontWeight: 800,
+                                        fontSize: '0.9rem',
+                                        cursor: 'pointer',
+                                        boxShadow: '0 4px 12px rgba(27,48,34,0.2)'
+                                    }}
+                                >
+                                    Aplicar Filtros
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
 
             {/* Book Grid */}
@@ -156,7 +480,7 @@ export default function CatalogoPage() {
                 ) : books.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '4rem 0' }}>
                         <p style={{ fontSize: '3rem' }}>📚</p>
-                        <p style={{ fontFamily: "'Montserrat', sans-serif", color: '#555', marginTop: '0.5rem' }}>No hay libros disponibles</p>
+                        <p style={{ fontFamily: "'Montserrat', sans-serif", color: '#555', marginTop: '0.5rem' }}>No hay libros que coincidan con los filtros</p>
                     </div>
                 ) : (
                     <>
