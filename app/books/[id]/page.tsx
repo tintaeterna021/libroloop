@@ -169,9 +169,11 @@ export default function BookDetailPage() {
                             <span style={{ fontFamily: "'Montserrat', sans-serif", color: '#1B3022', fontSize: '2rem', fontWeight: 800 }}>
                                 ${Number(book.sale_price).toFixed(0)}
                             </span>
-                            <span style={{ backgroundColor: '#A67C00', color: 'white', fontSize: '0.72rem', fontWeight: 700, fontFamily: "'Montserrat', sans-serif", padding: '0.2rem 0.6rem', borderRadius: '999px' }}>
-                                50% OFF
-                            </span>
+                            {book.extra_discount_percent ? book.extra_discount_percent > 0 && (
+                                <span style={{ backgroundColor: '#A67C00', color: 'white', fontSize: '0.72rem', fontWeight: 700, fontFamily: "'Montserrat', sans-serif", padding: '0.2rem 0.6rem', borderRadius: '999px' }}>
+                                    {book.extra_discount_percent}% OFF
+                                </span>
+                            ) : null}
                         </div>
 
                         {/* ── 3. Ficha técnica ── */}
@@ -253,13 +255,20 @@ export default function BookDetailPage() {
                                     <p style={{ color: '#777', fontSize: '0.72rem', marginBottom: '0.4rem', fontFamily: "'Montserrat', sans-serif" }}>
                                         {rec.author}
                                     </p>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        <span style={{ textDecoration: 'line-through', color: '#aaa', fontSize: '0.7rem' }}>
-                                            ${Number(rec.original_price).toFixed(0)}
-                                        </span>
-                                        <span style={{ color: '#1B3022', fontWeight: 700, fontSize: '0.9rem', fontFamily: "'Montserrat', sans-serif" }}>
-                                            ${Number(rec.sale_price).toFixed(0)}
-                                        </span>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                            <span style={{ textDecoration: 'line-through', color: '#aaa', fontSize: '0.7rem' }}>
+                                                ${Number(rec.original_price).toFixed(0)}
+                                            </span>
+                                            <span style={{ color: '#1B3022', fontWeight: 700, fontSize: '0.9rem', fontFamily: "'Montserrat', sans-serif" }}>
+                                                ${Number(rec.sale_price).toFixed(0)}
+                                            </span>
+                                        </div>
+                                        {rec.extra_discount_percent ? rec.extra_discount_percent > 0 && (
+                                            <span style={{ backgroundColor: '#A67C00', color: 'white', fontSize: '0.58rem', fontWeight: 700, fontFamily: "'Montserrat', sans-serif", padding: '0.15rem 0.4rem', borderRadius: '999px' }}>
+                                                {rec.extra_discount_percent}% OFF
+                                            </span>
+                                        ) : null}
                                     </div>
                                 </div>
                             </Link>

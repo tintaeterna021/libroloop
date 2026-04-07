@@ -616,6 +616,11 @@ export default function CatalogoPage() {
                                                     ${Number(book.sale_price).toFixed(0)}
                                                 </span>
                                             </div>
+                                            {book.extra_discount_percent ? book.extra_discount_percent > 0 && (
+                                                <span style={{ backgroundColor: '#A67C00', color: 'white', fontSize: '0.62rem', fontWeight: 700, fontFamily: "'Montserrat', sans-serif", padding: '0.15rem 0.45rem', borderRadius: '999px' }}>
+                                                    {book.extra_discount_percent}% OFF
+                                                </span>
+                                            ) : null}
                                         </div>
                                     </div>
                                 </Link>
