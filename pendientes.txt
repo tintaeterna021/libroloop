@@ -1,10 +1,9 @@
-filtros
-sort
 botón vender, movil y web
 menú hamburguesa móvil
 recomendaciones en detalle
 carrito
 
 login admon
+published at
 
 cálculo precio mínimo

@@ -193,7 +193,8 @@ export default function CatalogoPage() {
     const [appliedFilters, setAppliedFilters] = useState({
         categories: [] as string[],
         priceRange: [PRICE_MIN, PRICE_MAX] as [number, number],
-        onlyWithDiscount: false
+        onlyWithDiscount: false,
+        sortBy: 'recent' as 'recent' | 'price_asc' | 'price_desc' | 'alpha' | 'discount'
     })
 
     // Temporary filters in the UI
@@ -236,8 +237,22 @@ export default function CatalogoPage() {
                 query = query.or(`title.ilike.%${searchTerm}%,author.ilike.%${searchTerm}%`)
             }
 
+            // Sorting logic
+            let orderCol = 'published_at'
+            let ascending = false
+
+            if (appliedFilters.sortBy === 'price_asc') {
+                orderCol = 'sale_price'; ascending = true
+            } else if (appliedFilters.sortBy === 'price_desc') {
+                orderCol = 'sale_price'; ascending = false
+            } else if (appliedFilters.sortBy === 'alpha') {
+                orderCol = 'title'; ascending = true
+            } else if (appliedFilters.sortBy === 'discount') {
+                orderCol = 'extra_discount_percent'; ascending = false
+            }
+
             const { data, error } = await query
-                .order('created_at', { ascending: false })
+                .order(orderCol, { ascending })
                 .range(currentPage * PAGE_SIZE, currentPage * PAGE_SIZE + PAGE_SIZE - 1)
 
             if (error) {
@@ -280,11 +295,12 @@ export default function CatalogoPage() {
     }, [fetchBooks])
 
     const handleApplyFilters = () => {
-        setAppliedFilters({
+        setAppliedFilters(prev => ({
+            ...prev,
             categories: tempCategories,
             priceRange: tempPriceRange,
             onlyWithDiscount: tempOnlyWithDiscount
-        })
+        }))
         setFiltersOpen(false)
     }
 
@@ -301,14 +317,16 @@ export default function CatalogoPage() {
         setAppliedFilters({
             categories: [],
             priceRange: [PRICE_MIN, PRICE_MAX],
-            onlyWithDiscount: false
+            onlyWithDiscount: false,
+            sortBy: 'recent'
         })
     }
 
     const anyFilterApplied = appliedFilters.categories.length > 0 || 
                              appliedFilters.priceRange[0] !== PRICE_MIN || 
                              appliedFilters.priceRange[1] !== PRICE_MAX ||
-                             appliedFilters.onlyWithDiscount
+                             appliedFilters.onlyWithDiscount ||
+                             appliedFilters.sortBy !== 'recent'
 
     return (
         <div style={{ backgroundColor: '#F5F2E7', minHeight: '100vh' }}>
@@ -508,6 +526,58 @@ export default function CatalogoPage() {
 
             {/* Book Grid */}
             <main style={{ maxWidth: '1100px', margin: '0 auto', padding: '1.5rem 1rem' }}>
+                
+                {/* Sorting bar above the grid */}
+                <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.8rem', 
+                    marginBottom: '1.25rem',
+                    overflowX: 'auto',
+                    paddingBottom: '5px',
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#1B3022', flexShrink: 0 }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M11 5L6 10L1 5" /><path d="M6 10V1" /><path d="M13 19L18 14L23 19" /><path d="M18 14V23" />
+                        </svg>
+                        <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            Ordenar
+                        </span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.45rem' }}>
+                        {[
+                            { val: 'recent', label: 'Recientes' },
+                            { val: 'price_asc', label: 'Menor precio' },
+                            { val: 'price_desc', label: 'Mayor precio' },
+                            { val: 'alpha', label: 'Nombre A-Z' },
+                            { val: 'discount', label: 'Ofertas' },
+                        ].map(sortOpt => (
+                            <button
+                                key={sortOpt.val}
+                                onClick={() => setAppliedFilters(prev => ({ ...prev, sortBy: sortOpt.val as any }))}
+                                style={{
+                                    whiteSpace: 'nowrap',
+                                    padding: '0.4rem 0.9rem',
+                                    borderRadius: '999px',
+                                    border: appliedFilters.sortBy === sortOpt.val ? '2px solid #1B3022' : '1.5px solid #dedad2',
+                                    backgroundColor: appliedFilters.sortBy === sortOpt.val ? '#1B3022' : 'white',
+                                    color: appliedFilters.sortBy === sortOpt.val ? 'white' : '#555',
+                                    fontFamily: "'Montserrat', sans-serif",
+                                    fontSize: '0.78rem',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.15s',
+                                    boxShadow: appliedFilters.sortBy === sortOpt.val ? '0 3px 8px rgba(27,48,34,0.15)' : 'none'
+                                }}
+                            >
+                                {sortOpt.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
                 {loading ? (
                     <div style={{ textAlign: 'center', padding: '4rem 0' }}>
                         <div style={{ borderTopColor: '#1B3022' }} className="inline-block w-8 h-8 border-2 border-gray-200 rounded-full animate-spin" />
