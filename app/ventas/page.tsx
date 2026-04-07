@@ -74,7 +74,7 @@ export default function MisVentasPage() {
             ❌ No Aprobado
           </div>
         )
-      case 5:
+      case 6:
         return (
           <div style={{ backgroundColor: '#d4edda', color: '#155724', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-block' }}>
             ✅ Publicado en Tienda
@@ -111,7 +111,7 @@ export default function MisVentasPage() {
   const renderStatusDesc = (book: SellerBook) => {
     switch (book.status_code) {
       case 1: return "Estamos analizando las fotos (Máx 24 hrs)."
-      case 5: return "Tu libro ya está disponible en nuestro catálogo para todos."
+      case 6: return "Tu libro ya está disponible en nuestro catálogo para todos."
       case 9: return "Este libro ya tiene nuevo dueño. Tu saldo se actualizará en tu próximo corte."
       case 10: return "El pago por este ejemplar ya fue transferido a tu cuenta."
       case 2: return book.rejection_comment || "No cumple con nuestros criterios de calidad o año de edición."

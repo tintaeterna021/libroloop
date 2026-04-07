@@ -8,7 +8,7 @@
 -- 1 en revisión
 -- 2 negado
 -- 4 aceptado
--- 5 publicado
+-- 6 publicado
 -- 7 apartado
 -- 8 pago adelanto
 -- 9 liquidado a libroloop

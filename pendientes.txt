@@ -1,11 +1,10 @@
+filtros
+sort
 botón vender, movil y web
 menú hamburguesa móvil
-secciones hasta arriba móvil
-
-cálculo precio mínimo
-subir imágenes para publicar
-
-publicar imágenes más pesadas
-publicar imgs ya guardadas
+recomendaciones en detalle
+carrito
 
 login admon
+
+cálculo precio mínimo
