@@ -11,7 +11,7 @@ export default function BookDetailPage() {
     const [book, setBook] = useState<Book | null>(null)
     const [recommendations, setRecommendations] = useState<Book[]>([])
     const [loading, setLoading] = useState(true)
-    const [activeImage, setActiveImage] = useState<'cover'|'back'>('cover')
+    const [activeImage, setActiveImage] = useState<'cover' | 'back'>('cover')
 
     useEffect(() => {
         fetchBook()
@@ -118,7 +118,7 @@ export default function BookDetailPage() {
                                 </div>
                             )}
                         </div>
-                        
+
                         {/* Thumbnails */}
                         {book.publish_front_image_url && book.publish_back_image_url && (
                             <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
@@ -215,21 +215,21 @@ export default function BookDetailPage() {
             {/* Recommendations Section */}
             {recommendations.length > 0 && (
                 <div style={{ maxWidth: '1100px', margin: '2rem auto 0', padding: '0 1rem' }}>
-                    <h2 style={{ 
-                        fontFamily: "'Playfair Display', serif", 
-                        fontSize: '1.5rem', 
-                        fontWeight: 700, 
-                        color: '#1A1A1A', 
+                    <h2 style={{
+                        fontFamily: "'Playfair Display', serif",
+                        fontSize: '1.5rem',
+                        fontWeight: 700,
+                        color: '#1A1A1A',
                         marginBottom: '1.25rem',
                         paddingBottom: '0.5rem',
                         borderBottom: '2px solid #e0ddd2'
                     }}>
-                        Libros similares
+                        También te pueden interesar
                     </h2>
-                    <div style={{ 
-                        display: 'grid', 
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', 
-                        gap: '1rem' 
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))',
+                        gap: '1rem'
                     }}>
                         {recommendations.map(rec => (
                             <Link href={`/books/${rec.id}`} key={rec.id} style={{ textDecoration: 'none', display: 'block' }}>
@@ -241,14 +241,14 @@ export default function BookDetailPage() {
                                     )}
                                 </div>
                                 <div style={{ padding: '0.6rem 0' }}>
-                                    <h4 style={{ 
-                                        fontFamily: "'Playfair Display', serif", 
-                                        color: '#1A1A1A', 
-                                        fontSize: '0.88rem', 
-                                        fontWeight: 700, 
-                                        lineHeight: 1.3, 
+                                    <h4 style={{
+                                        fontFamily: "'Playfair Display', serif",
+                                        color: '#1A1A1A',
+                                        fontSize: '0.88rem',
+                                        fontWeight: 700,
+                                        lineHeight: 1.3,
                                         marginBottom: '0.1rem',
-                                        display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' 
+                                        display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'
                                     }}>
                                         {rec.title}
                                     </h4>
