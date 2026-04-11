@@ -234,7 +234,12 @@ export default function CatalogoPage() {
 
             // Search
             if (searchTerm) {
-                query = query.or(`title.ilike.%${searchTerm}%,author.ilike.%${searchTerm}%`)
+                // Normalize to remove accents, then replace vowels and 'n'/'ñ' with SQL wildcard '_'
+                // This creates an accent-insensitive search pattern
+                const cleanTerm = searchTerm.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                const wildcardTerm = cleanTerm.replace(/[aeioun]/gi, '_')
+                
+                query = query.or(`title.ilike.%${wildcardTerm}%,author.ilike.%${wildcardTerm}%`)
             }
 
             // Sorting logic
