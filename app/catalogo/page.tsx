@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Book } from '@/lib/types'
 import Link from 'next/link'
+import { useCart } from '@/lib/CartContext'
 
 const CATEGORIES = [
     { value: "Ficción", label: "Ficción" },
@@ -183,6 +184,7 @@ function PriceRangeSlider({
 // ────────────────────────────────────────────────────────────────────────────
 
 export default function CatalogoPage() {
+    const { addToCart, openCart } = useCart()
     const [books, setBooks] = useState<Book[]>([])
     const [loading, setLoading] = useState(true)
     const [loadingMore, setLoadingMore] = useState(false)
@@ -627,6 +629,31 @@ export default function CatalogoPage() {
                                                 </span>
                                             ) : null}
                                         </div>
+                                        <button 
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                addToCart(book);
+                                                openCart();
+                                            }}
+                                            style={{
+                                                marginTop: '0.85rem',
+                                                width: '100%',
+                                                padding: '0.5rem',
+                                                backgroundColor: 'white',
+                                                color: '#1B3022',
+                                                border: '1.5px solid #1B3022',
+                                                borderRadius: '999px',
+                                                fontFamily: "'Montserrat', sans-serif",
+                                                fontSize: '0.75rem',
+                                                fontWeight: 700,
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s'
+                                            }}
+                                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#1B3022'; e.currentTarget.style.color = 'white'; }}
+                                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'white'; e.currentTarget.style.color = '#1B3022'; }}
+                                        >
+                                            Añadir al carrito
+                                        </button>
                                     </div>
                                 </Link>
                             ))}

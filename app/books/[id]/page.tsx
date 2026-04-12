@@ -5,8 +5,10 @@ import { supabase } from '@/lib/supabase'
 import { useParams } from 'next/navigation'
 import { Book } from '@/lib/types'
 import Link from 'next/link'
+import { useCart } from '@/lib/CartContext'
 
 export default function BookDetailPage() {
+    const { addToCart, openCart } = useCart()
     const params = useParams()
     const [book, setBook] = useState<Book | null>(null)
     const [recommendations, setRecommendations] = useState<Book[]>([])
@@ -176,6 +178,33 @@ export default function BookDetailPage() {
                             ) : null}
                         </div>
 
+                        {/* Añadir al Carrito (Botón Principal) */}
+                        <button
+                            onClick={() => {
+                                addToCart(book);
+                                openCart();
+                            }}
+                            style={{
+                                width: '100%',
+                                marginBottom: '2rem',
+                                padding: '1rem',
+                                backgroundColor: '#1B3022',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontFamily: "'Montserrat', sans-serif",
+                                fontSize: '1.05rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                boxShadow: '0 4px 12px rgba(27,48,34,0.15)'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+                        >
+                            Añadir al carrito
+                        </button>
+
                         {/* ── 3. Ficha técnica ── */}
                         <div style={{ background: 'white', borderRadius: '12px', padding: '1rem 1.25rem', marginBottom: '1.25rem', boxShadow: '0 1px 6px rgba(0,0,0,0.06)' }}>
                             <p style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: '#1A1A1A', marginBottom: '0.75rem', fontSize: '0.95rem' }}>
@@ -270,6 +299,31 @@ export default function BookDetailPage() {
                                             </span>
                                         ) : null}
                                     </div>
+                                    <button 
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            addToCart(rec);
+                                            openCart();
+                                        }}
+                                        style={{
+                                            marginTop: '0.85rem',
+                                            width: '100%',
+                                            padding: '0.45rem',
+                                            backgroundColor: 'white',
+                                            color: '#1B3022',
+                                            border: '1.5px solid #1B3022',
+                                            borderRadius: '999px',
+                                            fontFamily: "'Montserrat', sans-serif",
+                                            fontSize: '0.7rem',
+                                            fontWeight: 700,
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s'
+                                        }}
+                                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#1B3022'; e.currentTarget.style.color = 'white'; }}
+                                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'white'; e.currentTarget.style.color = '#1B3022'; }}
+                                    >
+                                        Añadir al carrito
+                                    </button>
                                 </div>
                             </Link>
                         ))}

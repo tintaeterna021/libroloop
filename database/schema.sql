@@ -45,14 +45,12 @@ CREATE TABLE user_payout_info (
 CREATE TABLE addresses (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
-    recipient_name TEXT,
-    phone TEXT,
     street TEXT,
     external_number TEXT,
     internal_number TEXT,
     postal_code TEXT,
     neighborhood TEXT,
-    references TEXT,
+    references_comments TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -92,10 +90,6 @@ CREATE TABLE books (
     language TEXT,
     page_count INTEGER,
     description TEXT,
-    link_amazon TEXT,
-    link_sotano TEXT,
-    link_buscalibre TEXT,
-    link_gandhi TEXT,
     original_front_image_url TEXT,
     original_back_image_url TEXT,
     publish_front_image_url TEXT,
@@ -105,7 +99,6 @@ CREATE TABLE books (
     profit_amount DECIMAL(10, 2),
     seller_payout_amount DECIMAL(10, 2),
     status_code INTEGER DEFAULT 1,
-    published BOOLEAN DEFAULT FALSE,
     rejection_comment TEXT,
     internal_comment TEXT,
     order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
@@ -121,5 +114,12 @@ CREATE TABLE books (
     returned_at TIMESTAMPTZ,
     discount_applied_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    link_amazon TEXT,
+    link_sotano TEXT,
+    link_buscalibre TEXT,
+    link_gandhi TEXT,
+    storage_option TEXT,
+    extra_discount_percent INTEGER DEFAULT 0,
+    link_pendulo TEXT
 );

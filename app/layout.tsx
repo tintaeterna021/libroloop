@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
 import SiteFooter from "@/components/SiteFooter";
+import { CartProvider } from "@/lib/CartContext";
+import CartDrawer from "@/components/CartDrawer";
 
 export const metadata: Metadata = {
   title: "Libroloop - Compra de Libros",
@@ -24,11 +26,14 @@ export default function RootLayout({
         />
       </head>
       <body style={{ backgroundColor: '#F5F2E7', fontFamily: "'Montserrat', sans-serif" }}>
-        <Navigation />
-        <div style={{ minHeight: 'calc(100vh - 200px)' }}>
-          {children}
-        </div>
-        <SiteFooter />
+        <CartProvider>
+          <Navigation />
+          <CartDrawer />
+          <div style={{ minHeight: 'calc(100vh - 200px)' }}>
+            {children}
+          </div>
+          <SiteFooter />
+        </CartProvider>
       </body>
     </html>
   );
