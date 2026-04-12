@@ -36,8 +36,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# pdf
+# documentos
 *.pdf
+*.txt
 
 # database
 /database

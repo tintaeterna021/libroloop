@@ -74,7 +74,17 @@ export default function MisVentasPage() {
             ❌ No Aprobado
           </div>
         )
+      case 4:
+      case 5:
+        return (
+          <div style={{ backgroundColor: '#d1ecf1', color: '#0c5460', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-block' }}>
+            📝 Aprobado
+          </div>
+        )
       case 6:
+      case 7:
+      case 8:
+      case 13:
         return (
           <div style={{ backgroundColor: '#d4edda', color: '#155724', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-block' }}>
             ✅ Publicado en Tienda
@@ -93,10 +103,15 @@ export default function MisVentasPage() {
           </div>
         )
       case 11:
+        return (
+          <div style={{ backgroundColor: '#e2e3e5', color: '#6c757d', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-block' }}>
+            🗑️ Dado de baja
+          </div>
+        )
       case 12:
         return (
           <div style={{ backgroundColor: '#e2e3e5', color: '#6c757d', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-block' }}>
-            {book.status_code === 11 ? 'Dado de baja' : 'Devuelto'}
+            📦 Devuelto
           </div>
         )
       default:
@@ -111,10 +126,19 @@ export default function MisVentasPage() {
   const renderStatusDesc = (book: SellerBook) => {
     switch (book.status_code) {
       case 1: return "Estamos analizando las fotos (Máx 24 hrs)."
-      case 6: return "Tu libro ya está disponible en nuestro catálogo para todos."
+      case 2: return `${book.rejection_comment ? book.rejection_comment.replace(/\.$/, '') + ". " : "No cumple con nuestros criterios de calidad. "}¡Anímate a probar con otros libros que tengas en casa!`
+      case 4:
+      case 5:
+        return "Estamos gestionando los últimos detalles para poder publicar tu libro."
+      case 6:
+      case 7:
+      case 8:
+      case 13:
+        return "Tu libro ya está disponible en nuestro catálogo para todos."
       case 9: return "Este libro ya tiene nuevo dueño. Tu saldo se actualizará en tu próximo corte."
       case 10: return "El pago por este ejemplar ya fue transferido a tu cuenta."
-      case 2: return book.rejection_comment || "No cumple con nuestros criterios de calidad o año de edición."
+      case 11: return "Este libro ha sido dado de baja de nuestro catálogo. ¡No te desanimes! Te invitamos a vender otros libros que tengas por ahí."
+      case 12: return "Este libro te ha sido devuelto a tu domicilio. ¡Aún así, nos encantaría que pruebes vender otros libros con nosotros!"
       default: return null
     }
   }

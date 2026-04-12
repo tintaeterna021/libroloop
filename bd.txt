@@ -92,7 +92,8 @@ estatus libro
 
 1 en revisión
 2 negado
-4 aceptado
+4 aprobado
+5 aceptado
 6 publicado
 7 apartado
 8 pago adelanto
