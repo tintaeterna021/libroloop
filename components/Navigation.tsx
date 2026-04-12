@@ -92,7 +92,7 @@ export default function Navigation() {
                                     Mis compras
                                 </Link>
                                 <Link href="/ventas" style={linkStyle('/ventas')}>
-                                    Ventas
+                                    Mis ventas
                                 </Link>
                             </>
                         )}

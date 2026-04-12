@@ -62,14 +62,21 @@ CREATE TABLE seller_payouts (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE SEQUENCE IF NOT EXISTS order_number_seq START 1000;
+
 CREATE TABLE orders (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    order_number INTEGER DEFAULT nextval('order_number_seq'),
     user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
     shipping_address_id UUID REFERENCES addresses(id) ON DELETE SET NULL,
+    contact_name TEXT,
+    contact_email TEXT,
+    contact_phone TEXT,
     total DECIMAL(10, 2),
     shipping_cost DECIMAL(10, 2),
     total_with_shipping DECIMAL(10, 2),
     status_code INTEGER DEFAULT 1,
+    payment_method TEXT,
     payment_confirmed_at TIMESTAMPTZ,
     preparation_at TIMESTAMPTZ,
     in_transit_at TIMESTAMPTZ,

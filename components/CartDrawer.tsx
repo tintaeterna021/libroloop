@@ -83,19 +83,29 @@ export default function CartDrawer() {
 
                     {/* Envío Gratis Banner */}
                     <div style={{
-                        backgroundColor: '#1B3022',
-                        color: 'white',
-                        padding: '0.6rem 1rem',
-                        borderRadius: '999px',
+                        backgroundColor: '#ebf4ec',
+                        border: '1px solid #1B3022',
+                        padding: '0.8rem 1rem',
+                        borderRadius: '12px',
                         textAlign: 'center',
                         fontFamily: "'Montserrat', sans-serif",
-                        fontSize: '0.8rem',
-                        fontWeight: 600,
-                        boxShadow: '0 2px 8px rgba(27,48,34,0.3)',
                     }}>
-                        {faltaParaEnvioGratis > 0 
-                            ? `¡Te faltan $${faltaParaEnvioGratis.toLocaleString('es-MX')} para envío gratis!` 
-                            : '¡Felicidades! Tienes envío gratis'}
+                        <p style={{ fontSize: '0.8rem', fontWeight: 600, color: '#1B3022', margin: '0 0 0.5rem 0' }}>
+                            {faltaParaEnvioGratis > 0 
+                                ? `¡Te faltan $${faltaParaEnvioGratis.toLocaleString('es-MX')} para envío gratis!` 
+                                : '¡Felicidades! Tienes envío gratis 🚚'}
+                        </p>
+                        {/* Progress Bar Container */}
+                        <div style={{ width: '100%', height: '8px', backgroundColor: 'rgba(27,48,34,0.15)', borderRadius: '999px', overflow: 'hidden' }}>
+                            {/* Progress Fill */}
+                            <div style={{ 
+                                width: `${Math.min(100, (subtotal / 499) * 100)}%`, 
+                                height: '100%', 
+                                backgroundColor: '#1B3022', 
+                                borderRadius: '999px',
+                                transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                            }} />
+                        </div>
                     </div>
                 </div>
 
