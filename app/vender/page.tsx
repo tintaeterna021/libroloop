@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
 // ─── Types ───────────────────────────────────────────────────
@@ -101,23 +102,31 @@ function StepFilter({
     {
       icon: (
         <svg viewBox="0 0 64 64" fill="none" stroke="#1B3022" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ width: 56, height: 56 }}>
-          <rect x="8" y="14" width="48" height="42" rx="4" />
+          <rect x="8" y="14" width="48" height="45" rx="4" />
           <path d="M8 26h48" />
           <path d="M22 8v12M42 8v12" />
-          <text x="32" y="46" textAnchor="middle" fontFamily="Montserrat" fontSize="13" fontWeight="800" stroke="none" fill="#1B3022">25</text>
-          <text x="32" y="57" textAnchor="middle" fontFamily="Montserrat" fontSize="7" fontWeight="700" stroke="none" fill="#1B3022">AÑOS</text>
+          <text x="32" y="46" textAnchor="middle" fontFamily="Montserrat" fontSize="13" fontWeight="800" stroke="none" fill="#1B3022">2001</text>
         </svg>
       ),
-      text: 'Solo libros de los últimos 25 años (2001 ‹).',
+      text: 'Solo libros de los últimos 25 años (+2001).',
     },
     {
       icon: (
-        <svg viewBox="0 0 64 64" fill="none" stroke="#1B3022" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ width: 56, height: 56 }}>
-          <rect x="6" y="18" width="36" height="28" rx="4" />
-          <circle cx="24" cy="32" r="7" />
-          <circle cx="24" cy="32" r="3" />
-          <path d="M36 22h10a4 4 0 0 1 4 4v16a4 4 0 0 1-4 4H42" />
-          <path d="M42 28l4-4" />
+        <svg
+          viewBox="0 0 64 64"
+          fill="none"
+          stroke="#1B3022"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ width: 56, height: 56 }}
+        >
+
+          {/* Cámara */}
+          <rect x="16" y="16" width="34" height="24" rx="4" />
+          <path d="M26 15l3-4h10l3 4" />
+          <circle cx="34" cy="28" r="6" />
+          <circle cx="34" cy="28" r="2.5" />
         </svg>
       ),
       text: 'Fotos claras: Portada y Contraportada.',
@@ -126,13 +135,39 @@ function StepFilter({
       icon: (
         <svg viewBox="0 0 64 64" fill="none" stroke="#1B3022" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ width: 56, height: 56 }}>
           <rect x="10" y="10" width="44" height="44" rx="4" />
-          <path d="M18 24h28M18 32h20M18 40h14" />
-          <circle cx="48" cy="48" r="12" fill="#F5F2E7" stroke="#1B3022" strokeWidth="3" />
-          <path d="M43 48l3 3 6-6" stroke="#1B3022" strokeWidth="2.5" />
-          <line x1="10" y1="10" x2="54" y2="54" stroke="#c0392b" strokeWidth="3" />
+          <path d="M18 32h20" stroke="#c0392b" />
+          <path d="M18 24h28M18 40h14" />
+          {/* Mancha roja irregular */}
+          <circle cx="22" cy="22" r="5" stroke="#c0392b" />
+
+          {/* Tache roja */}
+          <line x1="40" y1="36" x2="48" y2="46" stroke="#c0392b" strokeWidth="3.5" />
+          <line x1="40" y1="46" x2="48" y2="36" stroke="#c0392b" strokeWidth="3.5" />
         </svg>
       ),
       text: 'Sin subrayados, manchas o páginas sueltas.',
+    },
+    {
+      icon: (
+        <svg
+          viewBox="0 0 64 64"
+          fill="none"
+          stroke="#1B3022"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ width: 56, height: 56 }}
+        >
+          {/* Libro */}
+          <rect x="10" y="10" width="44" height="44" rx="4" />
+          <path d="M18 24h28M18 32h20M18 40h14" />
+
+          {/* Sello */}
+          <path d="M46 36l2.5 1.5 2.9-.4 1.5 2.5 2.5 1.5-.4 2.9 1.5 2.5-1.5 2.5.4 2.9-2.5 1.5-1.5 2.5-2.9-.4-2.5 1.5-2.5-1.5-2.9.4-1.5-2.5-2.5-1.5.4-2.9-1.5-2.5 1.5-2.5-.4-2.9 2.5-1.5 1.5-2.5 2.9.4L46 36z" fill="#F5F2E7" />
+          <path d="M42.5 46l2.5 2.5 5-6" />
+        </svg>
+      ),
+      text: 'No libros piratas.',
     },
   ]
 
@@ -567,12 +602,12 @@ function StepAccount({
   onBack: () => void
   onSelectStep: (step: StepNumber) => void
 }) {
+  const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [form, setForm] = useState({ phone: '', email: '', password: '' })
-  
+
   // Guardamos la sesión si existe
   const [sessionUser, setSessionUser] = useState<any>(null)
 
@@ -670,7 +705,7 @@ function StepAccount({
         if (dbError) throw dbError
       }
 
-      setSubmitted(true)
+      router.push('/vender/success')
     } catch (err: any) {
       console.error(err)
       setSubmitError(err.message || 'Ocurrió un error al procesar tu solicitud.')
@@ -679,39 +714,6 @@ function StepAccount({
     }
   }
 
-  if (submitted) {
-    return (
-      <div style={{
-        minHeight: '100vh', backgroundColor: '#F5F2E7',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        textAlign: 'center', padding: '2rem',
-      }}>
-        <div>
-          <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>📚</div>
-          <h2 style={{
-            fontFamily: "'Playfair Display', serif",
-            fontSize: '2rem', fontWeight: 900,
-            color: '#1B3022', marginBottom: '0.75rem',
-          }}>
-            ¡Listo! Recibimos tus libros.
-          </h2>
-          <p style={{
-            fontFamily: "'Montserrat', sans-serif",
-            color: '#555', fontSize: '0.95rem', lineHeight: 1.6, maxWidth: '360px',
-          }}>
-            Te daremos respuesta en menos de 24 horas. Nuestro equipo asignará el precio más competitivo para que se vendan rápido.
-          </p>
-          <Link href="/" style={{
-            display: 'inline-block', marginTop: '2rem',
-            color: '#1B3022', fontFamily: "'Montserrat', sans-serif",
-            fontWeight: 700, textDecoration: 'none', fontSize: '0.9rem',
-          }}>
-            ← Volver al inicio
-          </Link>
-        </div>
-      </div>
-    )
-  }
 
   const inputStyle: React.CSSProperties = {
     width: '100%',

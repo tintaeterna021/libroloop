@@ -10,6 +10,7 @@ export default function CheckoutPage() {
     const { cartItems, clearCart } = useCart()
     const [loading, setLoading] = useState(true)
     const [submitting, setSubmitting] = useState(false)
+    const [isSuccess, setIsSuccess] = useState(false)
     const [userId, setUserId] = useState<string | null>(null)
     const [colonias, setColonias] = useState<string[]>([])
     const [loadingColonias, setLoadingColonias] = useState(false)
@@ -32,10 +33,10 @@ export default function CheckoutPage() {
     const total_with_shipping = subtotal + shipping_cost
 
     useEffect(() => {
-        if (cartItems.length === 0 && !loading) {
+        if (cartItems.length === 0 && !loading && !isSuccess) {
             router.push('/catalogo')
         }
-    }, [cartItems, loading, router])
+    }, [cartItems, loading, router, isSuccess])
 
     useEffect(() => {
         const initCheckout = async () => {
@@ -204,6 +205,7 @@ export default function CheckoutPage() {
             if (booksError) throw booksError
 
             // 5. Success
+            setIsSuccess(true)
             clearCart()
             router.push(`/checkout/success?order=${order.order_number}`)
 
