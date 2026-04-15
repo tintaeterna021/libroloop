@@ -83,29 +83,19 @@ export default function CartDrawer() {
 
                     {/* Envío Gratis Banner */}
                     <div style={{
-                        backgroundColor: '#ebf4ec',
-                        border: '1px solid #1B3022',
-                        padding: '0.8rem 1rem',
-                        borderRadius: '12px',
+                        backgroundColor: '#1B3022',
+                        color: 'white',
+                        padding: '0.6rem 1rem',
+                        borderRadius: '999px',
                         textAlign: 'center',
                         fontFamily: "'Montserrat', sans-serif",
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        boxShadow: '0 2px 8px rgba(27,48,34,0.3)',
                     }}>
-                        <p style={{ fontSize: '0.8rem', fontWeight: 600, color: '#1B3022', margin: '0 0 0.5rem 0' }}>
-                            {faltaParaEnvioGratis > 0 
-                                ? `¡Te faltan $${faltaParaEnvioGratis.toLocaleString('es-MX')} para envío gratis!` 
-                                : '¡Felicidades! Tienes envío gratis 🚚'}
-                        </p>
-                        {/* Progress Bar Container */}
-                        <div style={{ width: '100%', height: '8px', backgroundColor: 'rgba(27,48,34,0.15)', borderRadius: '999px', overflow: 'hidden' }}>
-                            {/* Progress Fill */}
-                            <div style={{ 
-                                width: `${Math.min(100, (subtotal / 499) * 100)}%`, 
-                                height: '100%', 
-                                backgroundColor: '#1B3022', 
-                                borderRadius: '999px',
-                                transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-                            }} />
-                        </div>
+                        {faltaParaEnvioGratis > 0
+                            ? `¡Te faltan $${faltaParaEnvioGratis.toLocaleString('es-MX')} para envío gratis!`
+                            : '¡Felicidades! Tienes envío gratis'}
                     </div>
                 </div>
 
@@ -120,7 +110,7 @@ export default function CartDrawer() {
                             </svg>
                             <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.4rem', fontWeight: 700, marginBottom: '0.5rem' }}>Tu carrito está vacío</h3>
                             <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.9rem', color: '#555', lineHeight: 1.5 }}>
-                                ¡Explora nuestro catálogo y encuentra<br/>tu próxima gran lectura a mitad de precio!
+                                ¡Explora nuestro catálogo y encuentra<br />tu próxima gran lectura a mitad de precio!
                             </p>
                         </div>
                     ) : (
@@ -144,7 +134,7 @@ export default function CartDrawer() {
                                             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>📚</div>
                                         )}
                                     </div>
-                                    
+
                                     {/* Info */}
                                     <div style={{ flex: 1 }}>
                                         <h4 style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.9rem', fontWeight: 700, color: '#1A1A1A', marginBottom: '0.15rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
@@ -157,7 +147,7 @@ export default function CartDrawer() {
                                             ${item.sale_price.toLocaleString('es-MX')}
                                         </p>
                                     </div>
-                                    
+
                                     {/* Delete Button */}
                                     <button
                                         onClick={() => removeFromCart(item.id)}
@@ -189,19 +179,15 @@ export default function CartDrawer() {
                             ${subtotal.toLocaleString('es-MX')}
                         </span>
                     </div>
-                    
+
                     {ahorros > 0 && (
                         <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.9rem', fontWeight: 700, color: '#A67C00', marginBottom: '0.5rem' }}>
                             Tu ahorro total hoy: ${ahorros.toLocaleString('es-MX')}
                         </p>
                     )}
-                    
-                    <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.7rem', color: '#777', marginBottom: '1rem' }}>
-                        Los costos de envío se calculan en el siguiente paso
-                    </p>
 
                     {itemsCount > 0 ? (
-                        <Link 
+                        <Link
                             href="/checkout"
                             onClick={closeCart}
                             style={{

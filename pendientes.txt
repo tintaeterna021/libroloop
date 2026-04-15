@@ -1,8 +1,10 @@
 botón vender, movil y web
 menú hamburguesa móvil
-
+ordenar por fechas
 login admon
 
-gestión de pedidos
+
+en checkout siempre con status 7
+fotos, 4
 
 mis compras

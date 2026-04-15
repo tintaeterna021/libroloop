@@ -173,12 +173,9 @@ export default function CheckoutPage() {
                 if (newAddr) addressId = newAddr.id
             }
 
-            // 2. Logic flags based on shipping
-            const hasFreeShipping = shipping_cost === 0
-            const orderStatus = hasFreeShipping ? 2 : 1
-            const paymentConfirmedAt = hasFreeShipping ? new Date().toISOString() : null
-            const bookStatus = hasFreeShipping ? 8 : 7
-            const reservedAt = hasFreeShipping ? new Date().toISOString() : null
+            // 2. Logic flags — always pending confirmation regardless of shipping
+            const bookStatus = 7
+            const reservedAt = new Date().toISOString()
 
             // 3. Create Order
             const { data: order, error: orderError } = await supabase.from('orders').insert({
@@ -191,8 +188,7 @@ export default function CheckoutPage() {
                 shipping_cost: shipping_cost,
                 total_with_shipping: total_with_shipping,
                 payment_method: form.payment_method,
-                status_code: orderStatus,
-                payment_confirmed_at: paymentConfirmedAt
+                status_code: 1
             }).select('id, order_number').single()
 
             if (orderError) throw orderError
