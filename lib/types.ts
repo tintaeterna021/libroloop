@@ -64,6 +64,8 @@ export interface Book {
     link_gandhi?: string
     publish_front_image_url?: string
     publish_back_image_url?: string
+    original_front_image_url?: string
+    original_back_image_url?: string
     original_price: number
     sale_price: number
     status_code: number

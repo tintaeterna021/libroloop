@@ -13,7 +13,8 @@ export default function BookDetailPage() {
     const [book, setBook] = useState<Book | null>(null)
     const [recommendations, setRecommendations] = useState<Book[]>([])
     const [loading, setLoading] = useState(true)
-    const [activeImage, setActiveImage] = useState<'cover' | 'back'>('cover')
+    type ImageKey = 'publish_front' | 'publish_back' | 'original_front' | 'original_back'
+    const [activeImage, setActiveImage] = useState<ImageKey>('publish_front')
 
     useEffect(() => {
         fetchBook()
@@ -99,6 +100,7 @@ export default function BookDetailPage() {
 
                     {/* ── 1. Image gallery ── */}
                     <div style={{ flex: '0 0 340px' }}>
+                        {/* Main image */}
                         <div style={{
                             aspectRatio: '3/4',
                             borderRadius: '16px',
@@ -108,46 +110,57 @@ export default function BookDetailPage() {
                             position: 'relative',
                             marginBottom: '1rem'
                         }}>
-                            {(activeImage === 'cover' ? book.publish_front_image_url : book.publish_back_image_url) ? (
-                                <img
-                                    src={(activeImage === 'cover' ? book.publish_front_image_url : book.publish_back_image_url) as string}
-                                    alt={`${book.title} - ${activeImage}`}
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                />
-                            ) : (
-                                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '5rem' }}>
-                                    📚
-                                </div>
-                            )}
+                            {(() => {
+                                const urlMap: Record<string, string | null | undefined> = {
+                                    publish_front: book.publish_front_image_url,
+                                    publish_back: book.publish_back_image_url,
+                                    original_front: book.original_front_image_url,
+                                    original_back: book.original_back_image_url,
+                                }
+                                const src = urlMap[activeImage]
+                                return src ? (
+                                    <img
+                                        src={src}
+                                        alt={`${book.title} - ${activeImage}`}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    />
+                                ) : (
+                                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '5rem' }}>
+                                        📚
+                                    </div>
+                                )
+                            })()}
                         </div>
 
-                        {/* Thumbnails */}
-                        {book.publish_front_image_url && book.publish_back_image_url && (
-                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-                                <button
-                                    onClick={() => setActiveImage('cover')}
-                                    style={{
-                                        width: '60px', height: '80px',
-                                        borderRadius: '8px', overflow: 'hidden',
-                                        border: activeImage === 'cover' ? '2px solid #1B3022' : '2px solid transparent',
-                                        padding: 0, cursor: 'pointer',
-                                    }}
-                                >
-                                    <img src={book.publish_front_image_url} alt="Portada" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                </button>
-                                <button
-                                    onClick={() => setActiveImage('back')}
-                                    style={{
-                                        width: '60px', height: '80px',
-                                        borderRadius: '8px', overflow: 'hidden',
-                                        border: activeImage === 'back' ? '2px solid #1B3022' : '2px solid transparent',
-                                        padding: 0, cursor: 'pointer',
-                                    }}
-                                >
-                                    <img src={book.publish_back_image_url} alt="Contraportada" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                </button>
-                            </div>
-                        )}
+                        {/* Thumbnails — only images that exist */}
+                        {(() => {
+                            const thumbs: { key: string; url: string; label: string }[] = [
+                                { key: 'publish_front', url: book.publish_front_image_url!, label: 'Portada' },
+                                ...(book.publish_back_image_url ? [{ key: 'publish_back', url: book.publish_back_image_url, label: 'Contraportada' }] : []),
+                                { key: 'original_front', url: book.original_front_image_url!, label: 'Original (frente)' },
+                                { key: 'original_back', url: book.original_back_image_url!, label: 'Original (reverso)' },
+                            ]
+                            return thumbs.length > 1 ? (
+                                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                                    {thumbs.map(t => (
+                                        <button
+                                            key={t.key}
+                                            onClick={() => setActiveImage(t.key as any)}
+                                            title={t.label}
+                                            style={{
+                                                width: '60px', height: '80px',
+                                                borderRadius: '8px', overflow: 'hidden',
+                                                border: activeImage === t.key ? '2px solid #1B3022' : '2px solid transparent',
+                                                padding: 0, cursor: 'pointer',
+                                                flexShrink: 0,
+                                            }}
+                                        >
+                                            <img src={t.url} alt={t.label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        </button>
+                                    ))}
+                                </div>
+                            ) : null
+                        })()}
                     </div>
 
                     {/* ── 2. Details block ── */}
