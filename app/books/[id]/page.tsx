@@ -274,7 +274,12 @@ export default function BookDetailPage() {
                         gap: '1rem'
                     }}>
                         {recommendations.map(rec => (
-                            <Link href={`/books/${rec.id}`} key={rec.id} style={{ textDecoration: 'none', display: 'block' }}>
+                            <Link href={`/books/${rec.id}`} key={rec.id} style={{
+                                textDecoration: 'none',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                height: '100%',
+                            }}>
                                 <div style={{ aspectRatio: '7/11', background: '#e8e4d8', overflow: 'hidden', borderRadius: '8px' }}>
                                     {rec.publish_front_image_url ? (
                                         <img src={rec.publish_front_image_url} alt={rec.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -282,7 +287,7 @@ export default function BookDetailPage() {
                                         <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem' }}>📚</div>
                                     )}
                                 </div>
-                                <div style={{ padding: '0.6rem 0' }}>
+                                <div style={{ padding: '0.6rem 0', display: 'flex', flexDirection: 'column' }}>
                                     <h4 style={{
                                         fontFamily: "'Playfair Display', serif",
                                         color: '#1A1A1A',
@@ -294,7 +299,16 @@ export default function BookDetailPage() {
                                     }}>
                                         {rec.title}
                                     </h4>
-                                    <p style={{ color: '#777', fontSize: '0.72rem', marginBottom: '0.4rem', fontFamily: "'Montserrat', sans-serif" }}>
+                                    <p style={{
+                                        color: '#777',
+                                        fontSize: '0.76rem',
+                                        marginBottom: '0.6rem',
+                                        fontFamily: "'Montserrat', sans-serif",
+                                        display: '-webkit-box',
+                                        WebkitLineClamp: 1,
+                                        WebkitBoxOrient: 'vertical',
+                                        overflow: 'hidden',
+                                    }}>
                                         {rec.author}
                                     </p>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
@@ -312,22 +326,27 @@ export default function BookDetailPage() {
                                             </span>
                                         ) : null}
                                     </div>
+                                </div>
+                                <div style={{
+                                    marginTop: 'auto',
+                                    padding: '0.5rem',
+                                }}>
                                     <button
                                         onClick={(e) => {
                                             e.preventDefault();
-                                            addToCart(rec);
+                                            addToCart(book);
                                             openCart();
                                         }}
                                         style={{
-                                            marginTop: '0.85rem',
+                                            marginTop: 'auto',
                                             width: '100%',
-                                            padding: '0.45rem',
+                                            padding: '0.5rem',
                                             backgroundColor: 'white',
                                             color: '#1B3022',
                                             border: '1.5px solid #1B3022',
                                             borderRadius: '999px',
                                             fontFamily: "'Montserrat', sans-serif",
-                                            fontSize: '0.7rem',
+                                            fontSize: '0.75rem',
                                             fontWeight: 700,
                                             cursor: 'pointer',
                                             transition: 'all 0.2s'

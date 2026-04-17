@@ -605,7 +605,12 @@ export default function CatalogoPage() {
                     <>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: '1rem' }}>
                             {books.map(book => (
-                                <Link href={`/books/${book.id}`} key={book.id} className="book-card" style={{ textDecoration: 'none', display: 'block' }}>
+                                <Link href={`/books/${book.id}`} key={book.id} className="book-card" style={{
+                                    textDecoration: 'none',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    height: '100%',
+                                }}>
                                     <div style={{ aspectRatio: '7/11', background: '#e8e4d8', overflow: 'hidden' }}>
                                         {book.publish_front_image_url ? (
                                             <img src={book.publish_front_image_url} alt={book.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -613,11 +618,28 @@ export default function CatalogoPage() {
                                             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem' }}>📚</div>
                                         )}
                                     </div>
-                                    <div style={{ padding: '0.75rem' }}>
+                                    <div
+                                        style={{
+                                            padding: '0.75rem',
+                                            display: 'flex',
+                                            flexDirection: 'column'
+                                        }}
+                                    >
                                         <h3 style={{ fontFamily: "'Playfair Display', serif", color: '#1A1A1A', fontSize: '0.93rem', fontWeight: 700, lineHeight: 1.3, marginBottom: '0.15rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                                             {book.title}
                                         </h3>
-                                        <p style={{ color: '#777', fontSize: '0.76rem', marginBottom: '0.6rem', fontFamily: "'Montserrat', sans-serif" }}>
+                                        <p
+                                            style={{
+                                                color: '#777',
+                                                fontSize: '0.76rem',
+                                                marginBottom: '0.6rem',
+                                                fontFamily: "'Montserrat', sans-serif",
+                                                display: '-webkit-box',
+                                                WebkitLineClamp: 1,
+                                                WebkitBoxOrient: 'vertical',
+                                                overflow: 'hidden',
+                                            }}
+                                        >
                                             {book.author}
                                         </p>
                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -635,6 +657,11 @@ export default function CatalogoPage() {
                                                 </span>
                                             ) : null}
                                         </div>
+                                    </div>
+                                    <div style={{
+                                        marginTop: 'auto',
+                                        padding: '0.5rem',
+                                    }}>
                                         <button
                                             onClick={(e) => {
                                                 e.preventDefault();
@@ -642,7 +669,7 @@ export default function CatalogoPage() {
                                                 openCart();
                                             }}
                                             style={{
-                                                marginTop: '0.85rem',
+                                                marginTop: 'auto',
                                                 width: '100%',
                                                 padding: '0.5rem',
                                                 backgroundColor: 'white',
@@ -673,6 +700,6 @@ export default function CatalogoPage() {
                     </>
                 )}
             </main>
-        </div>
+        </div >
     )
 }
