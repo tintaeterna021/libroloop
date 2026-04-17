@@ -248,7 +248,15 @@ export default function MisVentasPage() {
       </div>
 
       {/* Floating CTA & Legal */}
-      <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 100 }}>
+      <div
+        style={{
+          position: "fixed",
+          bottom: "2rem",
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 100,
+        }}
+      >
         <Link href="/vender" style={{
           display: 'flex', alignItems: 'center', gap: '0.5rem',
           backgroundColor: '#1B3022', color: 'white', textDecoration: 'none',

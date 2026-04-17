@@ -4,6 +4,7 @@ import Navigation from "@/components/Navigation";
 import SiteFooter from "@/components/SiteFooter";
 import { CartProvider } from "@/lib/CartContext";
 import CartDrawer from "@/components/CartDrawer";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 export const metadata: Metadata = {
   title: "Libroloop - Compra de Libros",
@@ -31,6 +32,7 @@ export default function RootLayout({
           <CartDrawer />
           <div style={{ minHeight: 'calc(100vh - 200px)' }}>
             {children}
+            <WhatsAppButton />
           </div>
           <SiteFooter />
         </CartProvider>
