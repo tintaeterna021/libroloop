@@ -91,10 +91,10 @@ function PriceRangeSlider({
             window.removeEventListener('touchmove', onTouchMove)
             window.removeEventListener('touchend', onUp)
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [values])
 
-    const leftPct  = toPercent(values[0])
+    const leftPct = toPercent(values[0])
     const rightPct = toPercent(values[1])
 
     return (
@@ -190,7 +190,7 @@ export default function CatalogoPage() {
     const [loadingMore, setLoadingMore] = useState(false)
     const [hasMore, setHasMore] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
-    
+
     // Filters applied to the query
     const [appliedFilters, setAppliedFilters] = useState({
         categories: [] as string[],
@@ -203,12 +203,12 @@ export default function CatalogoPage() {
     const [tempCategories, setTempCategories] = useState<string[]>([])
     const [tempPriceRange, setTempPriceRange] = useState<[number, number]>([PRICE_MIN, PRICE_MAX])
     const [tempOnlyWithDiscount, setTempOnlyWithDiscount] = useState(false)
-    
+
     const [filtersOpen, setFiltersOpen] = useState(false)
 
     const observerRef = useRef<IntersectionObserver | null>(null)
-    const loaderRef   = useRef<HTMLDivElement | null>(null)
-    const pageRef     = useRef(0)
+    const loaderRef = useRef<HTMLDivElement | null>(null)
+    const pageRef = useRef(0)
     const isFetchingRef = useRef(false)
 
     const fetchBooks = useCallback(async (reset = false) => {
@@ -236,12 +236,18 @@ export default function CatalogoPage() {
 
             // Search
             if (searchTerm) {
-                // Normalize to remove accents, then replace vowels and 'n'/'ñ' with SQL wildcard '_'
-                // This creates an accent-insensitive search pattern
-                const cleanTerm = searchTerm.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                const wildcardTerm = cleanTerm.replace(/[aeioun]/gi, '_')
-                
-                query = query.or(`title.ilike.%${wildcardTerm}%,author.ilike.%${wildcardTerm}%`)
+                const normalize = (text: string) =>
+                    text
+                        .toLowerCase()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "")
+                        .trim();
+
+                const cleanTerm = normalize(searchTerm).replace(/\s+/g, "%");
+
+                query = query.or(
+                    `title_normalized.ilike.%${cleanTerm}%,author_normalized.ilike.%${cleanTerm}%,isbn.ilike.%${cleanTerm}%`
+                );
             }
 
             // Sorting logic
@@ -312,7 +318,7 @@ export default function CatalogoPage() {
     }
 
     const handleToggleCategory = (val: string) => {
-        setTempCategories(prev => 
+        setTempCategories(prev =>
             prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val]
         )
     }
@@ -329,11 +335,11 @@ export default function CatalogoPage() {
         })
     }
 
-    const anyFilterApplied = appliedFilters.categories.length > 0 || 
-                             appliedFilters.priceRange[0] !== PRICE_MIN || 
-                             appliedFilters.priceRange[1] !== PRICE_MAX ||
-                             appliedFilters.onlyWithDiscount ||
-                             appliedFilters.sortBy !== 'recent'
+    const anyFilterApplied = appliedFilters.categories.length > 0 ||
+        appliedFilters.priceRange[0] !== PRICE_MIN ||
+        appliedFilters.priceRange[1] !== PRICE_MAX ||
+        appliedFilters.onlyWithDiscount ||
+        appliedFilters.sortBy !== 'recent'
 
     return (
         <div style={{ backgroundColor: '#F5F2E7', minHeight: '100vh' }}>
@@ -396,7 +402,7 @@ export default function CatalogoPage() {
                             }}
                         >
                             <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
-                                <path d="M1 3h14M3.5 8h9M6 13h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                                <path d="M1 3h14M3.5 8h9M6 13h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
                             </svg>
                             Filtros
                             {anyFilterApplied && (
@@ -469,18 +475,18 @@ export default function CatalogoPage() {
 
                             {/* Extra Discount Toggle */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0' }}>
-                                <label style={{ 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    gap: '0.6rem', 
+                                <label style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.6rem',
                                     cursor: 'pointer',
                                     fontFamily: "'Montserrat', sans-serif",
                                     fontSize: '0.85rem',
                                     fontWeight: 600,
                                     color: '#1B3022'
                                 }}>
-                                    <input 
-                                        type="checkbox" 
+                                    <input
+                                        type="checkbox"
                                         checked={tempOnlyWithDiscount}
                                         onChange={e => setTempOnlyWithDiscount(e.target.checked)}
                                         style={{ width: '18px', height: '18px', accentColor: '#1B3022', cursor: 'pointer' }}
@@ -507,7 +513,7 @@ export default function CatalogoPage() {
                                 >
                                     Limpiar todos
                                 </button>
-                                
+
                                 <button
                                     onClick={handleApplyFilters}
                                     style={{
@@ -533,12 +539,12 @@ export default function CatalogoPage() {
 
             {/* Book Grid */}
             <main style={{ maxWidth: '1100px', margin: '0 auto', padding: '1.5rem 1rem' }}>
-                
+
                 {/* Sorting bar above the grid */}
-                <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '0.8rem', 
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.8rem',
                     marginBottom: '1.25rem',
                     overflowX: 'auto',
                     paddingBottom: '5px',
@@ -600,7 +606,7 @@ export default function CatalogoPage() {
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: '1rem' }}>
                             {books.map(book => (
                                 <Link href={`/books/${book.id}`} key={book.id} className="book-card" style={{ textDecoration: 'none', display: 'block' }}>
-                                    <div style={{ aspectRatio: '3/4', background: '#e8e4d8', overflow: 'hidden' }}>
+                                    <div style={{ aspectRatio: '7/11', background: '#e8e4d8', overflow: 'hidden' }}>
                                         {book.publish_front_image_url ? (
                                             <img src={book.publish_front_image_url} alt={book.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         ) : (
@@ -629,7 +635,7 @@ export default function CatalogoPage() {
                                                 </span>
                                             ) : null}
                                         </div>
-                                        <button 
+                                        <button
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 addToCart(book);

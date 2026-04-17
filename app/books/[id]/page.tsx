@@ -47,7 +47,7 @@ export default function BookDetailPage() {
                 .eq('genre', genre)
                 .eq('status_code', 6)
                 .neq('id', currentId)
-                .limit(4)
+                .limit(5)
             if (error) throw error
             setRecommendations(data || [])
         } catch (err) {
@@ -102,7 +102,7 @@ export default function BookDetailPage() {
                     <div style={{ flex: '0 0 340px' }}>
                         {/* Main image */}
                         <div style={{
-                            aspectRatio: '3/4',
+                            aspectRatio: '7/11',
                             borderRadius: '16px',
                             overflow: 'hidden',
                             background: '#e0ddd2',
@@ -148,7 +148,7 @@ export default function BookDetailPage() {
                                             onClick={() => setActiveImage(t.key as any)}
                                             title={t.label}
                                             style={{
-                                                width: '60px', height: '80px',
+                                                width: '60px', height: '90px',
                                                 borderRadius: '8px', overflow: 'hidden',
                                                 border: activeImage === t.key ? '2px solid #1B3022' : '2px solid transparent',
                                                 padding: 0, cursor: 'pointer',
@@ -275,7 +275,7 @@ export default function BookDetailPage() {
                     }}>
                         {recommendations.map(rec => (
                             <Link href={`/books/${rec.id}`} key={rec.id} style={{ textDecoration: 'none', display: 'block' }}>
-                                <div style={{ aspectRatio: '3/4', background: '#e8e4d8', overflow: 'hidden', borderRadius: '8px' }}>
+                                <div style={{ aspectRatio: '7/11', background: '#e8e4d8', overflow: 'hidden', borderRadius: '8px' }}>
                                     {rec.publish_front_image_url ? (
                                         <img src={rec.publish_front_image_url} alt={rec.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     ) : (
@@ -312,7 +312,7 @@ export default function BookDetailPage() {
                                             </span>
                                         ) : null}
                                     </div>
-                                    <button 
+                                    <button
                                         onClick={(e) => {
                                             e.preventDefault();
                                             addToCart(rec);
