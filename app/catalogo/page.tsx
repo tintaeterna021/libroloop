@@ -38,7 +38,7 @@ const CATEGORIES = [
 
 const PRICE_MIN = 0
 const PRICE_MAX = 2000
-const PAGE_SIZE = 12
+const PAGE_SIZE = 10
 
 // ─── Custom dual-handle range slider ────────────────────────────────────────
 function PriceRangeSlider({
@@ -298,14 +298,14 @@ export default function CatalogoPage() {
     useEffect(() => {
         if (observerRef.current) observerRef.current.disconnect()
         observerRef.current = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting && !isFetchingRef.current) {
+            if (entries[0].isIntersecting && !isFetchingRef.current && hasMore) {
                 fetchBooks(false)
             }
         }, { threshold: 0.1 })
         if (loaderRef.current) observerRef.current.observe(loaderRef.current)
         return () => observerRef.current?.disconnect()
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [fetchBooks])
+    }, [fetchBooks, hasMore, books])
 
     const handleApplyFilters = () => {
         setAppliedFilters(prev => ({
