@@ -43,14 +43,14 @@ export default function CheckoutPage() {
             const { data: { session } } = await supabase.auth.getSession()
             if (session) {
                 setUserId(session.user.id)
-                
+
                 // Fetch profile
                 const { data: profile } = await supabase
                     .from('profiles')
                     .select('email, name, phone')
                     .eq('id', session.user.id)
                     .single()
-                
+
                 // Fetch last address
                 const { data: addresses } = await supabase
                     .from('addresses')
@@ -108,7 +108,7 @@ export default function CheckoutPage() {
                 setColonias([])
             }
         }
-        
+
         // Timeout to debounce slightly
         const timeoutId = setTimeout(fetchColonias, 300)
         return () => clearTimeout(timeoutId)
@@ -138,7 +138,7 @@ export default function CheckoutPage() {
 
                 // check if address changed or exists
                 const { data: existingAddrs } = await supabase.from('addresses').select('id').eq('user_id', userId).limit(1)
-                
+
                 if (existingAddrs && existingAddrs.length > 0) {
                     addressId = existingAddrs[0].id
                     await supabase.from('addresses').update({
@@ -225,13 +225,13 @@ export default function CheckoutPage() {
     return (
         <div style={{ backgroundColor: '#F5F2E7', minHeight: '100vh', padding: '2rem 1rem' }}>
             <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
-                
+
                 {/* Formulario */}
                 <div style={{ flex: '1 1 500px' }}>
                     <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '2rem', color: '#1A1A1A', marginBottom: '1.5rem' }}>
                         Completa tu compra
                     </h1>
-                    
+
                     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                         {/* Datos de Contacto */}
                         <div style={{ backgroundColor: 'white', padding: '1.5rem', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
@@ -276,23 +276,23 @@ export default function CheckoutPage() {
                                 <div>
                                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#555', marginBottom: '0.3rem' }}>Colonia *</label>
                                     {colonias.length > 0 ? (
-                                        <select 
-                                            name="neighborhood" 
-                                            value={form.neighborhood} 
-                                            onChange={handleInputChange} 
+                                        <select
+                                            name="neighborhood"
+                                            value={form.neighborhood}
+                                            onChange={handleInputChange}
                                             style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none', backgroundColor: 'white' }}
                                         >
                                             {colonias.map(c => <option key={c} value={c}>{c}</option>)}
                                         </select>
                                     ) : (
-                                        <input 
-                                            required 
-                                            type="text" 
-                                            name="neighborhood" 
-                                            value={form.neighborhood} 
-                                            onChange={handleInputChange} 
+                                        <input
+                                            required
+                                            type="text"
+                                            name="neighborhood"
+                                            value={form.neighborhood}
+                                            onChange={handleInputChange}
                                             placeholder={loadingColonias ? "Buscando colonias..." : "Ingresa CP o escribe tu colonia"}
-                                            style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none' }} 
+                                            style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none' }}
                                         />
                                     )}
                                 </div>
@@ -310,7 +310,7 @@ export default function CheckoutPage() {
                 <div style={{ flex: '1 1 350px' }}>
                     <div style={{ position: 'sticky', top: '90px', backgroundColor: 'white', padding: '1.5rem', borderRadius: '12px', boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}>
                         <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.4rem', fontWeight: 700, marginBottom: '1.25rem', color: '#1A1A1A' }}>Resumen del Pedido</h2>
-                        
+
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem', borderBottom: '1px solid #e0ddd2', paddingBottom: '1.5rem' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: "'Montserrat', sans-serif", fontSize: '0.95rem', color: '#555' }}>
                                 <span>Subtotal Libros ({cartItems.length}):</span>
@@ -341,8 +341,8 @@ export default function CheckoutPage() {
                             </label>
                         </div>
 
-                        <button 
-                            onClick={handleSubmit} 
+                        <button
+                            onClick={handleSubmit}
                             disabled={submitting}
                             style={{
                                 width: '100%',
@@ -356,10 +356,23 @@ export default function CheckoutPage() {
                                 fontSize: '1.1rem',
                                 cursor: submitting ? 'not-allowed' : 'pointer',
                                 transition: 'all 0.2s',
-                                boxShadow: '0 4px 12px rgba(27,48,34,0.2)'
+                                boxShadow: '0 4px 12px rgba(27,48,34,0.2)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
                             }}
                         >
-                            {submitting ? 'Procesando...' : 'Confirmar pedido'}
+                            {submitting ? (
+                                <>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ marginRight: '10px' }}>
+                                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeOpacity="0.25" />
+                                        <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite" />
+                                        </path>
+                                    </svg>
+                                    GENERANDO PEDIDO... POR FAVOR NO CIERRES LA PÁGINA.
+                                </>
+                            ) : 'Confirmar pedido'}
                         </button>
                     </div>
                 </div>
