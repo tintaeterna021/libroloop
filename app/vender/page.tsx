@@ -298,12 +298,12 @@ function PhotoSlot({
     setIsCompressing(true)
     try {
       const options = {
-        maxSizeMB: 0.15, // Máximo 150 KB para forzar mayor reducción
-        maxWidthOrHeight: 800, // Máximo 800px de altura/ancho
+        maxSizeMB: 0.35, // Balance moderado (~350KB)
+        maxWidthOrHeight: 1200, // Mitad de camino entre 800 y 1600
         useWebWorker: true,
-        initialQuality: 0.65 // Iniciamos bajando un 35% de calidad directamente
+        initialQuality: 0.75 // Calidad intermedia
       }
-
+      
       const compressedBlob = await imageCompression(file, options)
       const compressedFile = new File([compressedBlob], file.name, {
         type: compressedBlob.type,
