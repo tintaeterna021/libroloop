@@ -266,6 +266,7 @@ export default function CatalogoPage() {
 
             const { data, error } = await query
                 .order(orderCol, { ascending })
+                .order('id', { ascending: true })
                 .range(currentPage * PAGE_SIZE, currentPage * PAGE_SIZE + PAGE_SIZE - 1)
 
             if (error) {
