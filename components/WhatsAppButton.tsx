@@ -32,11 +32,12 @@ export default function WhatsAppButton() {
                 style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "0.6rem",
+                    justifyContent: "center",
+                    width: "56px",
+                    height: "56px",
                     backgroundColor: "#25D366",
                     color: "white",
-                    padding: "0.9rem 1.2rem",
-                    borderRadius: "999px",
+                    borderRadius: "50%",
                     textDecoration: "none",
                     fontWeight: 700,
                 }}

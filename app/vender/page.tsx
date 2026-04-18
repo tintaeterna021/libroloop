@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import imageCompression from 'browser-image-compression'
 
 // ─── Types ───────────────────────────────────────────────────
 interface BookSlot {
@@ -275,8 +276,9 @@ function PhotoSlot({
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [isCompressing, setIsCompressing] = useState(false)
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setErrorMsg(null)
     const file = e.target.files?.[0]
     if (!file) return
@@ -293,8 +295,28 @@ function PhotoSlot({
       return
     }
 
-    const url = URL.createObjectURL(file)
-    onFile(url, file)
+    setIsCompressing(true)
+    try {
+      const options = {
+        maxSizeMB: 0.15, // Máximo 150 KB para forzar mayor reducción
+        maxWidthOrHeight: 800, // Máximo 800px de altura/ancho
+        useWebWorker: true,
+        initialQuality: 0.65 // Iniciamos bajando un 35% de calidad directamente
+      }
+      
+      const compressedBlob = await imageCompression(file, options)
+      const compressedFile = new File([compressedBlob], file.name, {
+        type: compressedBlob.type,
+      })
+
+      const url = URL.createObjectURL(compressedFile)
+      onFile(url, compressedFile)
+    } catch (error) {
+      console.error('Error al comprimir la imagen:', error)
+      setErrorMsg('Error al optimizar la foto. Intenta con otra.')
+    } finally {
+      setIsCompressing(false)
+    }
   }
 
   return (
@@ -326,7 +348,16 @@ function PhotoSlot({
           if (!errorMsg) e.currentTarget.style.borderColor = '#bbb8ad'
         }}
       >
-        {preview ? (
+        {isCompressing ? (
+          <span style={{
+            fontFamily: "'Montserrat', sans-serif",
+            fontSize: '0.8rem',
+            color: '#1B3022',
+            fontWeight: 700,
+          }}>
+            Comprimiendo...
+          </span>
+        ) : preview ? (
           <img src={preview} alt={label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
           <>
