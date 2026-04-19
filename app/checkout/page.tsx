@@ -12,6 +12,8 @@ export default function CheckoutPage() {
     const [submitting, setSubmitting] = useState(false)
     const [isSuccess, setIsSuccess] = useState(false)
     const [userId, setUserId] = useState<string | null>(null)
+    const [isProfileLocked, setIsProfileLocked] = useState(false)
+    const [isAddressLocked, setIsAddressLocked] = useState(false)
     const [colonias, setColonias] = useState<string[]>([])
     const [loadingColonias, setLoadingColonias] = useState(false)
 
@@ -60,6 +62,16 @@ export default function CheckoutPage() {
                     .limit(1)
 
                 const address = addresses && addresses.length > 0 ? addresses[0] : null
+
+                if (profile) {
+                    if (profile.name || profile.phone) {
+                        setIsProfileLocked(true)
+                    }
+                }
+
+                if (address) {
+                    setIsAddressLocked(true)
+                }
 
                 setForm(prev => ({
                     ...prev,
@@ -239,15 +251,15 @@ export default function CheckoutPage() {
                             <div style={{ display: 'grid', gap: '1rem' }}>
                                 <div>
                                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#555', marginBottom: '0.3rem' }}>Correo Electrónico *</label>
-                                    <input required type="email" name="email" value={form.email} onChange={handleInputChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none' }} />
+                                    <input required readOnly={isProfileLocked} type="email" name="email" value={form.email} onChange={handleInputChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none', backgroundColor: isProfileLocked ? '#f9f9f9' : 'white', color: isProfileLocked ? '#888' : 'inherit', cursor: isProfileLocked ? 'not-allowed' : 'text' }} />
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#555', marginBottom: '0.3rem' }}>Teléfono / WhatsApp *</label>
-                                    <input required type="tel" name="phone" value={form.phone} onChange={handleInputChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none' }} />
+                                    <input required readOnly={isProfileLocked} type="tel" name="phone" value={form.phone} onChange={handleInputChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none', backgroundColor: isProfileLocked ? '#f9f9f9' : 'white', color: isProfileLocked ? '#888' : 'inherit', cursor: isProfileLocked ? 'not-allowed' : 'text' }} />
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#555', marginBottom: '0.3rem' }}>Nombre de quien recibe *</label>
-                                    <input required type="text" name="name" value={form.name} onChange={handleInputChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none' }} />
+                                    <input required readOnly={isProfileLocked} type="text" name="name" value={form.name} onChange={handleInputChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none', backgroundColor: isProfileLocked ? '#f9f9f9' : 'white', color: isProfileLocked ? '#888' : 'inherit', cursor: isProfileLocked ? 'not-allowed' : 'text' }} />
                                 </div>
                             </div>
                         </div>
@@ -259,46 +271,48 @@ export default function CheckoutPage() {
                             <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '1fr 1fr' }}>
                                 <div style={{ gridColumn: '1 / -1' }}>
                                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#555', marginBottom: '0.3rem' }}>Calle *</label>
-                                    <input required type="text" name="street" value={form.street} onChange={handleInputChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none' }} />
+                                    <input required readOnly={isAddressLocked} type="text" name="street" value={form.street} onChange={handleInputChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none', backgroundColor: isAddressLocked ? '#f9f9f9' : 'white', color: isAddressLocked ? '#888' : 'inherit', cursor: isAddressLocked ? 'not-allowed' : 'text' }} />
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#555', marginBottom: '0.3rem' }}>Número Exterior *</label>
-                                    <input required type="text" name="external_number" value={form.external_number} onChange={handleInputChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none' }} />
+                                    <input required readOnly={isAddressLocked} type="text" name="external_number" value={form.external_number} onChange={handleInputChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none', backgroundColor: isAddressLocked ? '#f9f9f9' : 'white', color: isAddressLocked ? '#888' : 'inherit', cursor: isAddressLocked ? 'not-allowed' : 'text' }} />
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#555', marginBottom: '0.3rem' }}>Número Interior</label>
-                                    <input type="text" name="internal_number" value={form.internal_number} onChange={handleInputChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none' }} />
+                                    <input readOnly={isAddressLocked} type="text" name="internal_number" value={form.internal_number} onChange={handleInputChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none', backgroundColor: isAddressLocked ? '#f9f9f9' : 'white', color: isAddressLocked ? '#888' : 'inherit', cursor: isAddressLocked ? 'not-allowed' : 'text' }} />
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#555', marginBottom: '0.3rem' }}>Código Postal *</label>
-                                    <input required type="text" name="postal_code" value={form.postal_code} onChange={handleInputChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none' }} />
+                                    <input required readOnly={isAddressLocked} type="text" name="postal_code" value={form.postal_code} onChange={handleInputChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none', backgroundColor: isAddressLocked ? '#f9f9f9' : 'white', color: isAddressLocked ? '#888' : 'inherit', cursor: isAddressLocked ? 'not-allowed' : 'text' }} />
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#555', marginBottom: '0.3rem' }}>Colonia *</label>
-                                    {colonias.length > 0 ? (
+                                    {colonias.length > 0 && !isAddressLocked ? (
                                         <select
+                                            disabled={isAddressLocked}
                                             name="neighborhood"
                                             value={form.neighborhood}
                                             onChange={handleInputChange}
-                                            style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none', backgroundColor: 'white' }}
+                                            style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none', backgroundColor: isAddressLocked ? '#f9f9f9' : 'white', cursor: isAddressLocked ? 'not-allowed' : 'pointer' }}
                                         >
                                             {colonias.map(c => <option key={c} value={c}>{c}</option>)}
                                         </select>
                                     ) : (
                                         <input
                                             required
+                                            readOnly={isAddressLocked}
                                             type="text"
                                             name="neighborhood"
                                             value={form.neighborhood}
                                             onChange={handleInputChange}
                                             placeholder={loadingColonias ? "Buscando colonias..." : "Ingresa CP o escribe tu colonia"}
-                                            style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none' }}
+                                            style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none', backgroundColor: isAddressLocked ? '#f9f9f9' : 'white', color: isAddressLocked ? '#888' : 'inherit', cursor: isAddressLocked ? 'not-allowed' : 'text' }}
                                         />
                                     )}
                                 </div>
                                 <div style={{ gridColumn: '1 / -1' }}>
                                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#555', marginBottom: '0.3rem' }}>Referencias de entrega</label>
-                                    <textarea name="references_comments" value={form.references_comments} onChange={handleInputChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none', resize: 'vertical', minHeight: '80px' }}></textarea>
+                                    <textarea readOnly={isAddressLocked} name="references_comments" value={form.references_comments} onChange={handleInputChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none', resize: 'vertical', minHeight: '80px', backgroundColor: isAddressLocked ? '#f9f9f9' : 'white', color: isAddressLocked ? '#888' : 'inherit', cursor: isAddressLocked ? 'not-allowed' : 'text' }}></textarea>
                                 </div>
                             </div>
                         </div>
@@ -375,6 +389,22 @@ export default function CheckoutPage() {
                             ) : 'Confirmar pedido'}
                         </button>
                     </div>
+                </div>
+
+                {/* --- SOPORTE --- */}
+                <div style={{ width: '100%', textAlign: 'center', marginTop: '1rem', padding: '0 1rem' }}>
+                    <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.85rem', color: '#666', lineHeight: 1.5 }}>
+                        ¿Ves algún error en tus datos? Por favor contacta a nuestro equipo de soporte{' '}
+                        <a 
+                            href="https://wa.me/524426067589?text=Hola, hay un error en mis datos de envío en el checkout de LibroLoop" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            style={{ color: '#1B3022', fontWeight: 700, textDecoration: 'underline' }}
+                        >
+                            aquí
+                        </a>. 
+                        Igual puedes realizar tu pedido, ya que no habrá más actualizaciones de datos en este paso.
+                    </p>
                 </div>
 
             </div>

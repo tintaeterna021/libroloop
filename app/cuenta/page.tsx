@@ -41,6 +41,8 @@ export default function MiCuentaPage() {
   const [userId, setUserId] = useState<string | null>(null)
 
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [nameDraft, setNameDraft] = useState('')
+  const [updatingProfile, setUpdatingProfile] = useState(false)
   const [address, setAddress] = useState<Address | null>(null)
   const [payout, setPayout] = useState<PayoutInfo | null>(null)
 
@@ -75,7 +77,10 @@ export default function MiCuentaPage() {
         supabase.from('user_payout_info').select('*').eq('user_id', session.user.id).limit(1).maybeSingle()
       ])
 
-      if (profileRes.data) setProfile(profileRes.data)
+      if (profileRes.data) {
+        setProfile(profileRes.data)
+        setNameDraft(profileRes.data.name || '')
+      }
       if (addressRes.data) setAddress(addressRes.data)
       if (payoutRes.data) setPayout(payoutRes.data)
 
@@ -129,6 +134,25 @@ export default function MiCuentaPage() {
     } else {
       setPayout(data)
     }
+  }
+
+  const handleUpdateProfile = async () => {
+    if (!userId) return
+    setUpdatingProfile(true)
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ name: nameDraft })
+      .eq('id', userId)
+
+    if (error) {
+      alert('Error al actualizar el perfil')
+      console.error(error)
+    } else {
+      setProfile(prev => prev ? { ...prev, name: nameDraft } : null)
+      // Small visual feedback could go here
+    }
+    setUpdatingProfile(false)
   }
 
   if (loading) {
@@ -235,9 +259,43 @@ export default function MiCuentaPage() {
               <p style={labelStyle}>Correo Electrónico</p>
               <p style={{ fontFamily: "'Montserrat', sans-serif", color: '#111827', margin: 0, fontSize: '1rem' }}>{profile?.email || 'No disponible'}</p>
             </div>
-            <div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
               <p style={labelStyle}>Nombre Completo</p>
-              <p style={{ fontFamily: "'Montserrat', sans-serif", color: '#111827', margin: 0, fontSize: '1rem' }}>{profile?.name || 'No especificado'}</p>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input 
+                  type="text" 
+                  value={nameDraft} 
+                  onChange={e => setNameDraft(e.target.value)} 
+                  style={{ 
+                    ...inputStyle, 
+                    marginBottom: 0, 
+                    flex: 1,
+                    backgroundColor: updatingProfile ? '#f9fafb' : '#fff'
+                  }} 
+                  placeholder="Tu nombre completo"
+                />
+                {(nameDraft !== profile?.name) && (
+                  <button 
+                    onClick={handleUpdateProfile}
+                    disabled={updatingProfile}
+                    style={{
+                      backgroundColor: '#1B3022',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '0 1.25rem',
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontWeight: 700,
+                      fontSize: '0.85rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      opacity: updatingProfile ? 0.7 : 1
+                    }}
+                  >
+                    {updatingProfile ? '...' : 'Guardar'}
+                  </button>
+                )}
+              </div>
             </div>
             <div>
               <p style={labelStyle}>Teléfono</p>
