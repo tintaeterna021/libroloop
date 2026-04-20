@@ -366,20 +366,32 @@ export default function MiCuentaPage() {
         <div style={cardStyle}>
           <h2 style={sectionTitleStyle}>Datos Bancarios (Para recibir pagos por tus libros)</h2>
           {payout ? (
-            <div style={{
-              backgroundColor: payout.is_active === 1 ? '#ebf4ec' : '#fef3c7',
-              padding: '1.5rem', borderRadius: '12px',
-              border: `1px solid ${payout.is_active === 1 ? '#a8c4af' : '#fde68a'}`,
-              display: 'flex', alignItems: 'center', gap: '1.25rem'
-            }}>
-              <div style={{ fontSize: '2.5rem' }}>{payout.is_active === 1 ? '✅' : '⏳'}</div>
-              <div>
-                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '1.1rem', fontWeight: 700, color: payout.is_active === 1 ? '#1B3022' : '#92400e', margin: '0 0 0.35rem 0' }}>
-                  Tu cuenta está {payout.is_active === 1 ? 'Activa' : 'Pendiente de Revisión'}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div style={{
+                backgroundColor: payout.is_active === 1 ? '#ebf4ec' : '#fef3c7',
+                padding: '1rem 1.5rem', borderRadius: '12px',
+                border: `1px solid ${payout.is_active === 1 ? '#a8c4af' : '#fde68a'}`,
+                display: 'flex', alignItems: 'center', gap: '1rem'
+              }}>
+                <div style={{ fontSize: '1.5rem' }}>{payout.is_active === 1 ? '✅' : '⏳'}</div>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.95rem', fontWeight: 700, color: payout.is_active === 1 ? '#1B3022' : '#92400e', margin: 0 }}>
+                  Estado de cuenta: {payout.is_active === 1 ? 'Activa' : 'Pendiente de Revisión'}
                 </p>
-                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.9rem', color: '#4b5563', margin: 0, lineHeight: 1.4 }}>
-                  Por tu seguridad, los datos bancarios se encuentran ocultos. Los pagos se realizarán de manera automática a la cuenta registrada.
-                </p>
+              </div>
+
+              <div style={{ backgroundColor: '#f9fafb', padding: '1.5rem', borderRadius: '12px', border: '1px solid #e5e7eb', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+                <div>
+                  <p style={labelStyle}>Titular de la Cuenta</p>
+                  <p style={{ fontFamily: "'Montserrat', sans-serif", color: '#111827', margin: 0, fontSize: '1rem' }}>{payout.account_holder_name}</p>
+                </div>
+                <div>
+                  <p style={labelStyle}>Banco</p>
+                  <p style={{ fontFamily: "'Montserrat', sans-serif", color: '#111827', margin: 0, fontSize: '1rem' }}>{payout.bank_name}</p>
+                </div>
+                <div>
+                  <p style={labelStyle}>CLABE Interbancaria</p>
+                  <p style={{ fontFamily: "'Montserrat', sans-serif", color: '#111827', margin: 0, fontSize: '1rem', letterSpacing: '1px' }}>{payout.clabe}</p>
+                </div>
               </div>
             </div>
           ) : (
