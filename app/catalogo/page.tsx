@@ -7,23 +7,23 @@ import Link from 'next/link'
 import { useCart } from '@/lib/CartContext'
 
 const CATEGORIES = [
-    { value: "Ficción", label: "Ficción" },
-    { value: "Ficción juvenil", label: "Ficción juvenil" },
-    { value: "Juvenil no ficción", label: "Juvenil no ficción" },
     { value: "Autoayuda y desarrollo personal", label: "Autoayuda y desarrollo personal" },
-    { value: "Familia y relaciones", label: "Familia y relaciones" },
-    { value: "Negocios y economía", label: "Negocios y economía" },
-    { value: "Historia", label: "Historia" },
-    { value: "Salud y bienestar", label: "Salud y bienestar" },
-    { value: "Tecnología y ciencia", label: "Tecnología y ciencia" },
-    { value: "Filosofía y pensamiento", label: "Filosofía y pensamiento" },
-    { value: "Religión y espiritualidad", label: "Religión y espiritualidad" },
+    { value: "Arte y fotografía", label: "Arte y fotografía" },
     { value: "Biografía y autobiografía", label: "Biografía y autobiografía" },
     { value: "Cocina y hogar", label: "Cocina y hogar" },
-    { value: "Arte y fotografía", label: "Arte y fotografía" },
     { value: "Deportes", label: "Deportes" },
     { value: "Educación", label: "Educación" },
-    { value: "Otros", label: "Otros" }
+    { value: "Familia y relaciones", label: "Familia y relaciones" },
+    { value: "Ficción", label: "Ficción" },
+    { value: "Ficción juvenil", label: "Ficción juvenil" },
+    { value: "Filosofía y pensamiento", label: "Filosofía y pensamiento" },
+    { value: "Historia", label: "Historia" },
+    { value: "Juvenil no ficción", label: "Juvenil no ficción" },
+    { value: "Negocios y economía", label: "Negocios y economía" },
+    { value: "Otros", label: "Otros" },
+    { value: "Religión y espiritualidad", label: "Religión y espiritualidad" },
+    { value: "Salud y bienestar", label: "Salud y bienestar" },
+    { value: "Tecnología y ciencia", label: "Tecnología y ciencia" },
 ]
 
 const PRICE_MIN = 0
