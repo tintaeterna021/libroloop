@@ -20,6 +20,9 @@ export default function MisVentasPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [books, setBooks] = useState<SellerBook[]>([])
+  const [sortBy, setSortBy] = useState<'name' | 'status'>('name')
+
+
 
   useEffect(() => {
     const fetchVentas = async () => {
@@ -55,10 +58,22 @@ export default function MisVentasPage() {
   }
 
   // Cálculos Técnicos
-  const soldBooks = books.filter(b => b.status_code === 9 || b.status_code === 10)
-  const totalGenerado = soldBooks.reduce((sum, b) => sum + (Number(b.seller_payout_amount) || 0), 0)
+  const totalGenerado = books.filter(b => b.status_code === 10).reduce((sum, b) => sum + (Number(b.seller_payout_amount) || 0), 0)
   const saldoPendiente = books.filter(b => b.status_code === 9).reduce((sum, b) => sum + (Number(b.seller_payout_amount) || 0), 0)
-  const totalVendidosConteo = soldBooks.length
+  const totalVendidosConteo = books.filter(b => b.status_code === 9 || b.status_code === 10).length
+
+  // Lógica de ordenamiento
+  const sortedBooks = [...books].sort((a, b) => {
+    if (sortBy === 'name') {
+      return (a.title || 'Libro En Revisión').localeCompare(b.title || 'Libro En Revisión')
+    }
+    if (sortBy === 'status') {
+      return a.status_code - b.status_code
+    }
+    return 0 
+  })
+
+
 
   const renderStatusBadge = (book: SellerBook) => {
     switch (book.status_code) {
@@ -188,7 +203,32 @@ export default function MisVentasPage() {
 
       {/* Inventario List */}
       <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '4rem 1.5rem 2rem' }}>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '2rem', color: '#1B3022', marginBottom: '2rem' }}>Estado del Inventario</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '2rem', color: '#1B3022', margin: 0 }}>Estado del Inventario</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            <label style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.85rem', color: '#666', fontWeight: 600 }}>Ordenar por:</label>
+            <select 
+              value={sortBy} 
+              onChange={(e) => setSortBy(e.target.value as any)}
+              style={{ 
+                padding: '0.5rem 1rem', 
+                borderRadius: '8px', 
+                border: '1px solid #ddd', 
+                fontFamily: "'Montserrat', sans-serif", 
+                fontSize: '0.85rem',
+                backgroundColor: 'white',
+                cursor: 'pointer',
+                outline: 'none',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+              }}
+            >
+              <option value="name">Nombre</option>
+              <option value="status">Estado</option>
+            </select>
+
+          </div>
+        </div>
+
 
         {books.length === 0 ? (
           <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: '4rem 2rem', textAlign: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.02)', border: '1.5px dashed #dedad2' }}>
@@ -199,7 +239,8 @@ export default function MisVentasPage() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-            {books.map(book => (
+            {sortedBooks.map(book => (
+
               <div key={book.id} style={{ display: 'flex', gap: '1.5rem', backgroundColor: 'white', borderRadius: '16px', padding: '1.2rem', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', alignItems: 'center' }}>
                 {/* Thumbnail */}
                 <div style={{ width: '85px', height: '120px', flexShrink: 0, borderRadius: '8px', overflow: 'hidden', backgroundColor: '#f0f0f0' }}>

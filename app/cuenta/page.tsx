@@ -262,20 +262,20 @@ export default function MiCuentaPage() {
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <p style={labelStyle}>Nombre Completo</p>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <input 
-                  type="text" 
-                  value={nameDraft} 
-                  onChange={e => setNameDraft(e.target.value)} 
-                  style={{ 
-                    ...inputStyle, 
-                    marginBottom: 0, 
+                <input
+                  type="text"
+                  value={nameDraft}
+                  onChange={e => setNameDraft(e.target.value)}
+                  style={{
+                    ...inputStyle,
+                    marginBottom: 0,
                     flex: 1,
                     backgroundColor: updatingProfile ? '#f9fafb' : '#fff'
-                  }} 
+                  }}
                   placeholder="Tu nombre completo"
                 />
                 {(nameDraft !== profile?.name) && (
-                  <button 
+                  <button
                     onClick={handleUpdateProfile}
                     disabled={updatingProfile}
                     style={{
