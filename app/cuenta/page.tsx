@@ -32,6 +32,8 @@ type PayoutInfo = {
   is_active: number
 }
 
+
+
 export default function MiCuentaPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
@@ -217,7 +219,9 @@ export default function MiCuentaPage() {
     marginTop: '1rem'
   }
 
+
   return (
+
     <div style={{ minHeight: '100vh', backgroundColor: '#F5F2E7', padding: '4rem 1.5rem' }}>
       <div style={{ maxWidth: '850px', margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
@@ -305,6 +309,7 @@ export default function MiCuentaPage() {
         </div>
 
         {/* --- DIRECCIÓN --- */}
+
         <div style={cardStyle}>
           <h2 style={sectionTitleStyle}>Dirección de Recolección/Envío</h2>
           {address ? (
@@ -436,3 +441,5 @@ export default function MiCuentaPage() {
     </div>
   )
 }
+
+
