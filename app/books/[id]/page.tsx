@@ -83,6 +83,12 @@ export default function BookDetailPage() {
     }
 
     return (
+        <>
+        <style>{`
+            @media (max-width: 640px) {
+                .recs-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            }
+        `}</style>
         <div style={{ minHeight: '100vh', backgroundColor: '#F5F2E7', paddingBottom: '2rem' }}>
 
             {/* Back link */}
@@ -99,7 +105,7 @@ export default function BookDetailPage() {
                 <div className="md:flex gap-10">
 
                     {/* ── 1. Image gallery ── */}
-                    <div style={{ flex: '0 0 340px' }}>
+                    <div style={{ flex: '0 0 272px' }}>
                         {/* Main image */}
                         <div style={{
                             aspectRatio: '7/11',
@@ -268,11 +274,13 @@ export default function BookDetailPage() {
                     }}>
                         También te pueden interesar
                     </h2>
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))',
-                        gap: '1rem'
-                    }}>
+                    <div
+                        className="recs-grid"
+                        style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))',
+                            gap: '1rem'
+                        }}>
                         {recommendations.map(rec => (
                             <Link href={`/books/${rec.id}`} key={rec.id} style={{
                                 textDecoration: 'none',
@@ -364,5 +372,6 @@ export default function BookDetailPage() {
             )}
 
         </div>
+        </>
     )
 }
