@@ -126,32 +126,39 @@ export default function CartDrawer() {
                                     boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                                     alignItems: 'center'
                                 }}>
-                                    {/* Image */}
-                                    <div style={{ width: '60px', height: '80px', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#F5F2E7', flexShrink: 0 }}>
-                                        {item.image_url ? (
-                                            <img src={item.image_url} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        ) : (
-                                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>📚</div>
-                                        )}
-                                    </div>
+                                    {/* Clickable area → book detail */}
+                                    <Link
+                                        href={`/books/${item.id}`}
+                                        onClick={closeCart}
+                                        style={{ display: 'flex', gap: '1rem', flex: 1, textDecoration: 'none', alignItems: 'center', minWidth: 0 }}
+                                    >
+                                        {/* Image */}
+                                        <div style={{ width: '60px', height: '80px', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#F5F2E7', flexShrink: 0 }}>
+                                            {item.image_url ? (
+                                                <img src={item.image_url} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            ) : (
+                                                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>📚</div>
+                                            )}
+                                        </div>
 
-                                    {/* Info */}
-                                    <div style={{ flex: 1 }}>
-                                        <h4 style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.9rem', fontWeight: 700, color: '#1A1A1A', marginBottom: '0.15rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                                            {item.title}
-                                        </h4>
-                                        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.75rem', color: '#555', marginBottom: '0.5rem' }}>
-                                            {item.author}
-                                        </p>
-                                        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '1rem', fontWeight: 800, color: '#1A1A1A' }}>
-                                            ${item.sale_price.toLocaleString('es-MX')}
-                                        </p>
-                                    </div>
+                                        {/* Info */}
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                            <h4 style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.9rem', fontWeight: 700, color: '#1A1A1A', marginBottom: '0.15rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                                {item.title}
+                                            </h4>
+                                            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.75rem', color: '#555', marginBottom: '0.5rem' }}>
+                                                {item.author}
+                                            </p>
+                                            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '1rem', fontWeight: 800, color: '#1A1A1A' }}>
+                                                ${item.sale_price.toLocaleString('es-MX')}
+                                            </p>
+                                        </div>
+                                    </Link>
 
                                     {/* Delete Button */}
                                     <button
                                         onClick={() => removeFromCart(item.id)}
-                                        style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#999', padding: '0.5rem', alignSelf: 'flex-start', transition: 'color 0.2s' }}
+                                        style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#999', padding: '0.5rem', alignSelf: 'flex-start', transition: 'color 0.2s', flexShrink: 0 }}
                                         onMouseEnter={e => e.currentTarget.style.color = '#e53935'}
                                         onMouseLeave={e => e.currentTarget.style.color = '#999'}
                                         title="Eliminar del carrito"
@@ -162,6 +169,7 @@ export default function CartDrawer() {
                                     </button>
                                 </div>
                             ))}
+
                         </div>
                     )}
                 </div>
