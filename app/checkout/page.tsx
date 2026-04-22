@@ -16,6 +16,7 @@ export default function CheckoutPage() {
     const [isAddressLocked, setIsAddressLocked] = useState(false)
     const [colonias, setColonias] = useState<string[]>([])
     const [loadingColonias, setLoadingColonias] = useState(false)
+    const [cpError, setCpError] = useState<string | null>(null)
 
     const [form, setForm] = useState({
         email: '',
@@ -96,6 +97,14 @@ export default function CheckoutPage() {
         const fetchColonias = async () => {
             const cp = form.postal_code.trim()
             if (cp.length === 5) {
+                // Validate CDMX range: 06000 – 16999
+                const cpNum = parseInt(cp, 10)
+                if (cpNum < 1000 || cpNum > 16999) {
+                    setCpError('Por el momento solo hacemos entregas dentro de la CDMX. El código postal ingresado no pertenece a la CDMX.')
+                    setColonias([])
+                    return
+                }
+                setCpError(null)
                 setLoadingColonias(true)
                 try {
                     const res = await fetch(`https://api.zippopotam.us/mx/${cp}`)
@@ -117,6 +126,7 @@ export default function CheckoutPage() {
                     setLoadingColonias(false)
                 }
             } else if (cp.length < 5) {
+                setCpError(null)
                 setColonias([])
             }
         }
@@ -283,7 +293,8 @@ export default function CheckoutPage() {
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#555', marginBottom: '0.3rem' }}>Código Postal *</label>
-                                    <input required readOnly={isAddressLocked} type="text" name="postal_code" value={form.postal_code} onChange={handleInputChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e0ddd2', outline: 'none', backgroundColor: isAddressLocked ? '#f9f9f9' : 'white', color: isAddressLocked ? '#888' : 'inherit', cursor: isAddressLocked ? 'not-allowed' : 'text' }} />
+                                    <input required readOnly={isAddressLocked} type="text" name="postal_code" value={form.postal_code} onChange={handleInputChange} maxLength={5} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: cpError ? '1px solid #c0392b' : '1px solid #e0ddd2', outline: 'none', backgroundColor: isAddressLocked ? '#f9f9f9' : 'white', color: isAddressLocked ? '#888' : 'inherit', cursor: isAddressLocked ? 'not-allowed' : 'text' }} />
+                                    {cpError && <p style={{ marginTop: '0.4rem', fontSize: '0.75rem', color: '#c0392b', lineHeight: 1.4 }}>{cpError}</p>}
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#555', marginBottom: '0.3rem' }}>Colonia *</label>
@@ -357,7 +368,7 @@ export default function CheckoutPage() {
 
                         <button
                             onClick={handleSubmit}
-                            disabled={submitting}
+                            disabled={submitting || !!cpError}
                             style={{
                                 width: '100%',
                                 padding: '1rem',
@@ -395,14 +406,14 @@ export default function CheckoutPage() {
                 <div style={{ width: '100%', textAlign: 'center', marginTop: '1rem', padding: '0 1rem' }}>
                     <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.85rem', color: '#666', lineHeight: 1.5 }}>
                         ¿Ves algún error en tus datos? Por favor contacta a nuestro equipo de soporte{' '}
-                        <a 
-                            href="https://wa.me/524426067589?text=Hola, hay un error en mis datos de envío en el checkout de LibroLoop" 
-                            target="_blank" 
+                        <a
+                            href="https://wa.me/524426067589?text=Hola, hay un error en mis datos de envío en el checkout de LibroLoop"
+                            target="_blank"
                             rel="noopener noreferrer"
                             style={{ color: '#1B3022', fontWeight: 700, textDecoration: 'underline' }}
                         >
                             aquí
-                        </a>. 
+                        </a>.
                         Igual puedes realizar tu pedido, ya que no habrá más actualizaciones de datos en este paso.
                     </p>
                 </div>
