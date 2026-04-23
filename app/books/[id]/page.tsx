@@ -120,7 +120,7 @@ export default function BookDetailPage() {
             @media (max-width: 640px) {
                 .book-image-col { width: 80% !important; max-width: 80% !important; flex: none !important; margin: 0 auto !important; }
             }
-            .recs-scroll { display: flex; gap: 1rem; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 0.25rem 0; }
+            .recs-scroll { display: flex; gap: 1rem; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 0.25rem 0; align-items: stretch; }
             .recs-scroll::-webkit-scrollbar { display: none; }
             .recs-card { flex: 0 0 calc(25% - 0.75rem); scroll-snap-align: start; min-width: 0; }
             .recs-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; border-radius: 50%; border: none; background: rgba(27,48,34,0.85); color: white; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: opacity 0.2s, background 0.2s; z-index: 2; }
@@ -325,50 +325,49 @@ export default function BookDetailPage() {
                                         textDecoration: 'none',
                                         display: 'flex',
                                         flexDirection: 'column',
-                                        height: '100%',
                                     }}>
-                                        <div style={{ aspectRatio: '7/11', background: '#e8e4d8', overflow: 'hidden', borderRadius: '8px' }}>
+                                        <div style={{ aspectRatio: '7/11', background: '#e8e4d8', overflow: 'hidden' }}>
                                             {rec.publish_front_image_url ? (
                                                 <img src={rec.publish_front_image_url} alt={rec.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                             ) : (
-                                                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem' }}>📚</div>
+                                                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem' }}>📚</div>
                                             )}
                                         </div>
-                                        <div style={{ padding: '0.6rem 0', display: 'flex', flexDirection: 'column' }}>
-                                            <h4 style={{
-                                                fontFamily: "'Playfair Display', serif",
-                                                color: '#1A1A1A',
-                                                fontSize: '0.88rem',
-                                                fontWeight: 700,
-                                                lineHeight: 1.3,
-                                                marginBottom: '0.1rem',
-                                                display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'
-                                            }}>
+                                        <div
+                                            style={{
+                                                padding: '0.75rem',
+                                                display: 'flex',
+                                                flexDirection: 'column'
+                                            }}
+                                        >
+                                            <h3 style={{ fontFamily: "'Playfair Display', serif", color: '#1A1A1A', fontSize: '0.93rem', fontWeight: 700, lineHeight: 1.3, marginBottom: '0.15rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                                                 {rec.title}
-                                            </h4>
-                                            <p style={{
-                                                color: '#777',
-                                                fontSize: '0.76rem',
-                                                marginBottom: '0.6rem',
-                                                fontFamily: "'Montserrat', sans-serif",
-                                                display: '-webkit-box',
-                                                WebkitLineClamp: 1,
-                                                WebkitBoxOrient: 'vertical',
-                                                overflow: 'hidden',
-                                            }}>
+                                            </h3>
+                                            <p
+                                                style={{
+                                                    color: '#777',
+                                                    fontSize: '0.76rem',
+                                                    marginBottom: '0.6rem',
+                                                    fontFamily: "'Montserrat', sans-serif",
+                                                    display: '-webkit-box',
+                                                    WebkitLineClamp: 1,
+                                                    WebkitBoxOrient: 'vertical',
+                                                    overflow: 'hidden',
+                                                }}
+                                            >
                                                 {rec.author}
                                             </p>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                    <span style={{ textDecoration: 'line-through', color: '#aaa', fontSize: '0.7rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                <div>
+                                                    <span style={{ textDecoration: 'line-through', color: '#aaa', fontSize: '0.75rem', marginRight: '0.25rem' }}>
                                                         ${Number(rec.original_price).toFixed(0)}
                                                     </span>
-                                                    <span style={{ color: '#1B3022', fontWeight: 700, fontSize: '0.9rem', fontFamily: "'Montserrat', sans-serif" }}>
+                                                    <span style={{ color: '#1B3022', fontWeight: 700, fontSize: '1rem', fontFamily: "'Montserrat', sans-serif" }}>
                                                         ${Number(rec.sale_price).toFixed(0)}
                                                     </span>
                                                 </div>
                                                 {rec.extra_discount_percent ? rec.extra_discount_percent > 0 && (
-                                                    <span style={{ backgroundColor: '#A67C00', color: 'white', fontSize: '0.58rem', fontWeight: 700, fontFamily: "'Montserrat', sans-serif", padding: '0.15rem 0.4rem', borderRadius: '999px' }}>
+                                                    <span style={{ backgroundColor: '#A67C00', color: 'white', fontSize: '0.62rem', fontWeight: 700, fontFamily: "'Montserrat', sans-serif", padding: '0.15rem 0.45rem', borderRadius: '999px' }}>
                                                         {rec.extra_discount_percent}% OFF
                                                     </span>
                                                 ) : null}
