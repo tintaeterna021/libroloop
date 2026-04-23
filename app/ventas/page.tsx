@@ -288,24 +288,29 @@ export default function MisVentasPage() {
         )}
       </div>
 
-      {/* Floating CTA & Legal */}
-      <div
-        style={{
-          position: "fixed",
-          bottom: "2rem",
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 100,
-        }}
-      >
-        <Link href="/vender" style={{
-          display: 'flex', alignItems: 'center', gap: '0.5rem',
-          backgroundColor: '#1B3022', color: 'white', textDecoration: 'none',
-          padding: '1.2rem 2.5rem', borderRadius: '999px', boxShadow: '0 8px 30px rgba(27,48,34,0.35)',
-          fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: '0.95rem',
-        }}>
-          <span style={{ fontSize: '1.3rem', lineHeight: 1 }}>+</span> Vender más libros
-        </Link>
+      {/* Sticky bottom CTA */}
+      <div style={{
+        position: 'sticky',
+        bottom: 0,
+        zIndex: 20,
+        padding: '1rem 1.5rem',
+        backgroundColor: '#F5F2E7',
+        borderTop: '1px solid #e0ddd2',
+      }}>
+        <div style={{ maxWidth: '480px', margin: '0 auto' }}>
+          <Link href="/vender" style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+            width: '100%',
+            padding: '1.1rem',
+            backgroundColor: '#1B3022', color: '#F5F2E7', textDecoration: 'none',
+            borderRadius: '999px',
+            fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: '1rem',
+            transition: 'background-color 0.2s',
+            touchAction: 'manipulation',
+          }}>
+            <span style={{ fontSize: '1.3rem', lineHeight: 1 }}>+</span> Vender más libros
+          </Link>
+        </div>
       </div>
 
       <div style={{ textAlign: 'center', marginTop: '4rem', paddingBottom: '2rem' }}>

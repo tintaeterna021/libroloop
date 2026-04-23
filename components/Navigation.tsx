@@ -12,6 +12,7 @@ export default function Navigation() {
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [menuOpen, setMenuOpen] = useState(false)
     const menuRef = useRef<HTMLDivElement>(null)
+    const hamburgerRef = useRef<HTMLButtonElement>(null)
 
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
@@ -32,7 +33,11 @@ export default function Navigation() {
     useEffect(() => {
         if (!menuOpen) return
         const handleClick = (e: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+            const target = e.target as Node
+            if (
+                menuRef.current && !menuRef.current.contains(target) &&
+                hamburgerRef.current && !hamburgerRef.current.contains(target)
+            ) {
                 setMenuOpen(false)
             }
         }
@@ -211,6 +216,7 @@ export default function Navigation() {
 
                             {/* Hamburger — mobile only */}
                             <button
+                                ref={hamburgerRef}
                                 className="nav-hamburger"
                                 onClick={() => setMenuOpen(o => !o)}
                                 aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
