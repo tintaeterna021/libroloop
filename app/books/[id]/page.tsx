@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useParams } from 'next/navigation'
 import { Book } from '@/lib/types'
@@ -15,6 +15,38 @@ export default function BookDetailPage() {
     const [loading, setLoading] = useState(true)
     type ImageKey = 'publish_front' | 'publish_back' | 'original_front' | 'original_back'
     const [activeImage, setActiveImage] = useState<ImageKey>('publish_front')
+
+    // ── Carousel state ──
+    const scrollRef = useRef<HTMLDivElement>(null)
+    const [canScrollLeft, setCanScrollLeft] = useState(false)
+    const [canScrollRight, setCanScrollRight] = useState(false)
+
+    const updateArrows = useCallback(() => {
+        const el = scrollRef.current
+        if (!el) return
+        setCanScrollLeft(el.scrollLeft > 4)
+        setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4)
+    }, [])
+
+    useEffect(() => {
+        if (recommendations.length === 0) return
+        const el = scrollRef.current
+        if (!el) return
+        const t = setTimeout(updateArrows, 100)
+        el.addEventListener('scroll', updateArrows, { passive: true })
+        window.addEventListener('resize', updateArrows)
+        return () => { clearTimeout(t); el.removeEventListener('scroll', updateArrows); window.removeEventListener('resize', updateArrows) }
+    }, [recommendations, updateArrows])
+
+    const scrollCarousel = (dir: 1 | -1) => {
+        const el = scrollRef.current
+        if (!el) return
+        // Each card is 25% on desktop; scroll by 4 cards
+        const cardWidth = el.clientWidth / 4
+        const isMobile = window.innerWidth < 640
+        const step = isMobile ? el.clientWidth : cardWidth * 4
+        el.scrollBy({ left: dir * step, behavior: 'smooth' })
+    }
 
     useEffect(() => {
         fetchBook()
@@ -47,7 +79,7 @@ export default function BookDetailPage() {
                 .eq('genre', genre)
                 .eq('status_code', 6)
                 .neq('id', currentId)
-                .limit(5)
+
             if (error) throw error
             setRecommendations(data || [])
         } catch (err) {
@@ -86,9 +118,17 @@ export default function BookDetailPage() {
         <>
             <style>{`
             @media (max-width: 640px) {
-                .recs-grid { grid-template-columns: repeat(2, 1fr) !important; }
-                .recs-item:nth-child(n+3) { display: none !important; }
                 .book-image-col { width: 80% !important; max-width: 80% !important; flex: none !important; margin: 0 auto !important; }
+            }
+            .recs-scroll { display: flex; gap: 1rem; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 0.25rem 0; }
+            .recs-scroll::-webkit-scrollbar { display: none; }
+            .recs-card { flex: 0 0 calc(25% - 0.75rem); scroll-snap-align: start; min-width: 0; }
+            .recs-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; border-radius: 50%; border: none; background: rgba(27,48,34,0.85); color: white; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: opacity 0.2s, background 0.2s; z-index: 2; }
+            .recs-arrow:hover { background: #1B3022; }
+            .recs-arrow.hidden { opacity: 0; pointer-events: none; }
+            @media (max-width: 640px) {
+                .recs-card { flex: 0 0 calc(50% - 0.5rem); }
+                .recs-arrow { width: 28px; height: 28px; font-size: 0.85rem; }
             }
         `}</style>
             <div style={{ minHeight: '100vh', backgroundColor: '#F5F2E7', paddingBottom: '2rem' }}>
@@ -262,7 +302,7 @@ export default function BookDetailPage() {
                     </div>
                 </div>
 
-                {/* Recommendations Section */}
+                {/* Recommendations Carousel */}
                 {recommendations.length > 0 && (
                     <div style={{ maxWidth: '1100px', margin: '2rem auto 0', padding: '0 1rem' }}>
                         <h2 style={{
@@ -276,99 +316,97 @@ export default function BookDetailPage() {
                         }}>
                             También te pueden interesar
                         </h2>
-                        <div
-                            className="recs-grid"
-                            style={{
-                                display: 'grid',
-                                gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))',
-                                gap: '1rem'
-                            }}>
-                            {recommendations.map((rec, idx) => (
-                                <Link href={`/books/${rec.id}`} key={rec.id} className="recs-item" style={{
-                                    textDecoration: 'none',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    height: '100%',
-                                }}>
-                                    <div style={{ aspectRatio: '7/11', background: '#e8e4d8', overflow: 'hidden', borderRadius: '8px' }}>
-                                        {rec.publish_front_image_url ? (
-                                            <img src={rec.publish_front_image_url} alt={rec.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        ) : (
-                                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem' }}>📚</div>
-                                        )}
-                                    </div>
-                                    <div style={{ padding: '0.6rem 0', display: 'flex', flexDirection: 'column' }}>
-                                        <h4 style={{
-                                            fontFamily: "'Playfair Display', serif",
-                                            color: '#1A1A1A',
-                                            fontSize: '0.88rem',
-                                            fontWeight: 700,
-                                            lineHeight: 1.3,
-                                            marginBottom: '0.1rem',
-                                            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'
-                                        }}>
-                                            {rec.title}
-                                        </h4>
-                                        <p style={{
-                                            color: '#777',
-                                            fontSize: '0.76rem',
-                                            marginBottom: '0.6rem',
-                                            fontFamily: "'Montserrat', sans-serif",
-                                            display: '-webkit-box',
-                                            WebkitLineClamp: 1,
-                                            WebkitBoxOrient: 'vertical',
-                                            overflow: 'hidden',
-                                        }}>
-                                            {rec.author}
-                                        </p>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                <span style={{ textDecoration: 'line-through', color: '#aaa', fontSize: '0.7rem' }}>
-                                                    ${Number(rec.original_price).toFixed(0)}
-                                                </span>
-                                                <span style={{ color: '#1B3022', fontWeight: 700, fontSize: '0.9rem', fontFamily: "'Montserrat', sans-serif" }}>
-                                                    ${Number(rec.sale_price).toFixed(0)}
-                                                </span>
-                                            </div>
-                                            {rec.extra_discount_percent ? rec.extra_discount_percent > 0 && (
-                                                <span style={{ backgroundColor: '#A67C00', color: 'white', fontSize: '0.58rem', fontWeight: 700, fontFamily: "'Montserrat', sans-serif", padding: '0.15rem 0.4rem', borderRadius: '999px' }}>
-                                                    {rec.extra_discount_percent}% OFF
-                                                </span>
-                                            ) : null}
-                                        </div>
-                                    </div>
-                                    <div style={{
-                                        marginTop: 'auto',
-                                        padding: '0.5rem',
+                        <div style={{ position: 'relative' }}>
+                            <button className={`recs-arrow ${canScrollLeft ? '' : 'hidden'}`} style={{ left: -12 }} onClick={() => scrollCarousel(-1)}>‹</button>
+                            <button className={`recs-arrow ${canScrollRight ? '' : 'hidden'}`} style={{ right: -12 }} onClick={() => scrollCarousel(1)}>›</button>
+                            <div ref={scrollRef} className="recs-scroll">
+                                {recommendations.slice(0, 8).map(rec => (
+                                    <Link href={`/books/${rec.id}`} key={rec.id} className="recs-card" style={{
+                                        textDecoration: 'none',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        height: '100%',
                                     }}>
-                                        <button
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                addToCart(book);
-                                                openCart();
-                                            }}
-                                            style={{
-                                                marginTop: 'auto',
-                                                width: '100%',
-                                                padding: '0.5rem',
-                                                backgroundColor: 'white',
-                                                color: '#1B3022',
-                                                border: '1.5px solid #1B3022',
-                                                borderRadius: '999px',
-                                                fontFamily: "'Montserrat', sans-serif",
-                                                fontSize: '0.75rem',
+                                        <div style={{ aspectRatio: '7/11', background: '#e8e4d8', overflow: 'hidden', borderRadius: '8px' }}>
+                                            {rec.publish_front_image_url ? (
+                                                <img src={rec.publish_front_image_url} alt={rec.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            ) : (
+                                                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem' }}>📚</div>
+                                            )}
+                                        </div>
+                                        <div style={{ padding: '0.6rem 0', display: 'flex', flexDirection: 'column' }}>
+                                            <h4 style={{
+                                                fontFamily: "'Playfair Display', serif",
+                                                color: '#1A1A1A',
+                                                fontSize: '0.88rem',
                                                 fontWeight: 700,
-                                                cursor: 'pointer',
-                                                transition: 'all 0.2s'
-                                            }}
-                                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#1B3022'; e.currentTarget.style.color = 'white'; }}
-                                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'white'; e.currentTarget.style.color = '#1B3022'; }}
-                                        >
-                                            Añadir al carrito
-                                        </button>
-                                    </div>
-                                </Link>
-                            ))}
+                                                lineHeight: 1.3,
+                                                marginBottom: '0.1rem',
+                                                display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'
+                                            }}>
+                                                {rec.title}
+                                            </h4>
+                                            <p style={{
+                                                color: '#777',
+                                                fontSize: '0.76rem',
+                                                marginBottom: '0.6rem',
+                                                fontFamily: "'Montserrat', sans-serif",
+                                                display: '-webkit-box',
+                                                WebkitLineClamp: 1,
+                                                WebkitBoxOrient: 'vertical',
+                                                overflow: 'hidden',
+                                            }}>
+                                                {rec.author}
+                                            </p>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                    <span style={{ textDecoration: 'line-through', color: '#aaa', fontSize: '0.7rem' }}>
+                                                        ${Number(rec.original_price).toFixed(0)}
+                                                    </span>
+                                                    <span style={{ color: '#1B3022', fontWeight: 700, fontSize: '0.9rem', fontFamily: "'Montserrat', sans-serif" }}>
+                                                        ${Number(rec.sale_price).toFixed(0)}
+                                                    </span>
+                                                </div>
+                                                {rec.extra_discount_percent ? rec.extra_discount_percent > 0 && (
+                                                    <span style={{ backgroundColor: '#A67C00', color: 'white', fontSize: '0.58rem', fontWeight: 700, fontFamily: "'Montserrat', sans-serif", padding: '0.15rem 0.4rem', borderRadius: '999px' }}>
+                                                        {rec.extra_discount_percent}% OFF
+                                                    </span>
+                                                ) : null}
+                                            </div>
+                                        </div>
+                                        <div style={{
+                                            marginTop: 'auto',
+                                            padding: '0.5rem',
+                                        }}>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    addToCart(rec);
+                                                    openCart();
+                                                }}
+                                                style={{
+                                                    marginTop: 'auto',
+                                                    width: '100%',
+                                                    padding: '0.5rem',
+                                                    backgroundColor: 'white',
+                                                    color: '#1B3022',
+                                                    border: '1.5px solid #1B3022',
+                                                    borderRadius: '999px',
+                                                    fontFamily: "'Montserrat', sans-serif",
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: 700,
+                                                    cursor: 'pointer',
+                                                    transition: 'all 0.2s'
+                                                }}
+                                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#1B3022'; e.currentTarget.style.color = 'white'; }}
+                                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'white'; e.currentTarget.style.color = '#1B3022'; }}
+                                            >
+                                                Añadir al carrito
+                                            </button>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 )}
