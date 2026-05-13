@@ -173,28 +173,57 @@ function PriceRangeSlider({
 }
 // ────────────────────────────────────────────────────────────────────────────
 
+const CATALOG_SESSION_KEY = 'libroloop_catalog_state'
+
 export default function CatalogoPage() {
     const { addToCart, openCart } = useCart()
     const [books, setBooks] = useState<Book[]>([])
     const [loading, setLoading] = useState(true)
     const [loadingMore, setLoadingMore] = useState(false)
     const [hasMore, setHasMore] = useState(true)
-    const [searchTerm, setSearchTerm] = useState('')
+
+    // ── Restaurar estado desde sessionStorage (solo una vez al montar) ────────
+    const savedStateRef = useRef<{
+        inputValue?: string
+        searchTerm?: string
+        scrollY?: number
+        appliedFilters?: {
+            categories: string[]
+            priceRange: [number, number]
+            onlyWithDiscount: boolean
+            sortBy: 'recent' | 'price_asc' | 'price_desc' | 'alpha' | 'discount'
+        }
+    } | null>(
+        (() => {
+            if (typeof window === 'undefined') return null
+            try { return JSON.parse(sessionStorage.getItem(CATALOG_SESSION_KEY) || 'null') } catch { return null }
+        })()
+    )
+    const saved = savedStateRef.current
+
+    const [inputValue, setInputValue] = useState<string>(saved?.inputValue ?? '')
+    const [searchTerm, setSearchTerm] = useState<string>(saved?.searchTerm ?? '')
 
     // Filters applied to the query
-    const [appliedFilters, setAppliedFilters] = useState({
-        categories: [] as string[],
+    const [appliedFilters, setAppliedFilters] = useState<{
+        categories: string[]
+        priceRange: [number, number]
+        onlyWithDiscount: boolean
+        sortBy: 'recent' | 'price_asc' | 'price_desc' | 'alpha' | 'discount'
+    }>(saved?.appliedFilters ?? {
+        categories: [],
         priceRange: [PRICE_MIN, PRICE_MAX] as [number, number],
         onlyWithDiscount: false,
-        sortBy: 'recent' as 'recent' | 'price_asc' | 'price_desc' | 'alpha' | 'discount'
+        sortBy: 'recent'
     })
 
     // Temporary filters in the UI
-    const [tempCategories, setTempCategories] = useState<string[]>([])
-    const [tempPriceRange, setTempPriceRange] = useState<[number, number]>([PRICE_MIN, PRICE_MAX])
-    const [tempOnlyWithDiscount, setTempOnlyWithDiscount] = useState(false)
+    const [tempCategories, setTempCategories] = useState<string[]>(saved?.appliedFilters?.categories ?? [])
+    const [tempPriceRange, setTempPriceRange] = useState<[number, number]>(saved?.appliedFilters?.priceRange ?? [PRICE_MIN, PRICE_MAX])
+    const [tempOnlyWithDiscount, setTempOnlyWithDiscount] = useState<boolean>(saved?.appliedFilters?.onlyWithDiscount ?? false)
 
     const [filtersOpen, setFiltersOpen] = useState(false)
+    const scrollRestoredRef = useRef(false)
 
     const observerRef = useRef<IntersectionObserver | null>(null)
     const loaderRef = useRef<HTMLDivElement | null>(null)
@@ -278,8 +307,49 @@ export default function CatalogoPage() {
             setLoading(false)
             setLoadingMore(false)
             isFetchingRef.current = false
+
+            // Restaurar scroll solo la primera vez que se cargan libros (vuelta del detalle)
+            const scrollY = savedStateRef.current?.scrollY
+            if (reset && !scrollRestoredRef.current && scrollY) {
+                scrollRestoredRef.current = true
+                requestAnimationFrame(() => {
+                    window.scrollTo({ top: scrollY, behavior: 'instant' })
+                })
+            }
         }
     }, [appliedFilters, searchTerm])
+
+    // Debounce: actualiza searchTerm 400ms después de que el usuario deja de teclear
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setSearchTerm(inputValue)
+        }, 400)
+        return () => clearTimeout(timer)
+    }, [inputValue])
+
+    // Guardar estado en sessionStorage cuando cambian filtros o búsqueda
+    useEffect(() => {
+        try {
+            sessionStorage.setItem(CATALOG_SESSION_KEY, JSON.stringify({
+                inputValue,
+                searchTerm,
+                appliedFilters,
+                scrollY: window.scrollY,
+            }))
+        } catch { /* ignorar errores de storage */ }
+    }, [inputValue, searchTerm, appliedFilters])
+
+    // Guardar scroll en tiempo real para capturar la posición exacta al salir
+    useEffect(() => {
+        const saveScroll = () => {
+            try {
+                const current = JSON.parse(sessionStorage.getItem(CATALOG_SESSION_KEY) || '{}')
+                sessionStorage.setItem(CATALOG_SESSION_KEY, JSON.stringify({ ...current, scrollY: window.scrollY }))
+            } catch { /* ignorar */ }
+        }
+        window.addEventListener('scroll', saveScroll, { passive: true })
+        return () => window.removeEventListener('scroll', saveScroll)
+    }, [])
 
     useEffect(() => {
         fetchBooks(true)
@@ -346,8 +416,8 @@ export default function CatalogoPage() {
                             <input
                                 type="text"
                                 placeholder="Busca por título, autor o ISBN..."
-                                value={searchTerm}
-                                onChange={e => setSearchTerm(e.target.value)}
+                                value={inputValue}
+                                onChange={e => setInputValue(e.target.value)}
                                 style={{
                                     width: '100%',
                                     padding: '0.75rem 1rem 0.75rem 2.8rem',
