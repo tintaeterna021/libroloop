@@ -187,8 +187,8 @@ export default function CatalogoPage() {
         inputValue?: string
         searchTerm?: string
         scrollY?: number
+        selectedCategory?: string
         appliedFilters?: {
-            categories: string[]
             priceRange: [number, number]
             onlyWithDiscount: boolean
             sortBy: 'recent' | 'price_asc' | 'price_desc' | 'alpha' | 'discount'
@@ -204,26 +204,30 @@ export default function CatalogoPage() {
     const [inputValue, setInputValue] = useState<string>(saved?.inputValue ?? '')
     const [searchTerm, setSearchTerm] = useState<string>(saved?.searchTerm ?? '')
 
+    // Categoría seleccionada (single-select, '' = Todos)
+    const [selectedCategory, setSelectedCategory] = useState<string>(saved?.selectedCategory ?? '')
+
     // Filters applied to the query
     const [appliedFilters, setAppliedFilters] = useState<{
-        categories: string[]
         priceRange: [number, number]
         onlyWithDiscount: boolean
         sortBy: 'recent' | 'price_asc' | 'price_desc' | 'alpha' | 'discount'
     }>(saved?.appliedFilters ?? {
-        categories: [],
         priceRange: [PRICE_MIN, PRICE_MAX] as [number, number],
         onlyWithDiscount: false,
         sortBy: 'recent'
     })
 
-    // Temporary filters in the UI
-    const [tempCategories, setTempCategories] = useState<string[]>(saved?.appliedFilters?.categories ?? [])
+    // Temporary filters in the UI (panel)
     const [tempPriceRange, setTempPriceRange] = useState<[number, number]>(saved?.appliedFilters?.priceRange ?? [PRICE_MIN, PRICE_MAX])
     const [tempOnlyWithDiscount, setTempOnlyWithDiscount] = useState<boolean>(saved?.appliedFilters?.onlyWithDiscount ?? false)
 
     const [filtersOpen, setFiltersOpen] = useState(false)
     const scrollRestoredRef = useRef(false)
+    const catScrollRef = useRef<HTMLDivElement | null>(null)
+    const catDragging = useRef(false)
+    const catStartX = useRef(0)
+    const catScrollLeft = useRef(0)
 
     const observerRef = useRef<IntersectionObserver | null>(null)
     const loaderRef = useRef<HTMLDivElement | null>(null)
@@ -240,9 +244,9 @@ export default function CatalogoPage() {
         try {
             let query = supabase.from('books').select('*').eq('status_code', 6)
 
-            // Category multiselect filter (OR logic via .in)
-            if (appliedFilters.categories.length > 0) {
-                query = query.in('genre', appliedFilters.categories)
+            // Category single-select filter
+            if (selectedCategory) {
+                query = query.eq('genre', selectedCategory)
             }
 
             // Price filter
@@ -317,7 +321,7 @@ export default function CatalogoPage() {
                 })
             }
         }
-    }, [appliedFilters, searchTerm])
+    }, [appliedFilters, searchTerm, selectedCategory])
 
     // Debounce: actualiza searchTerm 400ms después de que el usuario deja de teclear
     useEffect(() => {
@@ -333,11 +337,12 @@ export default function CatalogoPage() {
             sessionStorage.setItem(CATALOG_SESSION_KEY, JSON.stringify({
                 inputValue,
                 searchTerm,
+                selectedCategory,
                 appliedFilters,
                 scrollY: window.scrollY,
             }))
         } catch { /* ignorar errores de storage */ }
-    }, [inputValue, searchTerm, appliedFilters])
+    }, [inputValue, searchTerm, selectedCategory, appliedFilters])
 
     // Guardar scroll en tiempo real para capturar la posición exacta al salir
     useEffect(() => {
@@ -354,7 +359,7 @@ export default function CatalogoPage() {
     useEffect(() => {
         fetchBooks(true)
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [appliedFilters, searchTerm])
+    }, [appliedFilters, searchTerm, selectedCategory])
 
     useEffect(() => {
         if (observerRef.current) observerRef.current.disconnect()
@@ -371,32 +376,24 @@ export default function CatalogoPage() {
     const handleApplyFilters = () => {
         setAppliedFilters(prev => ({
             ...prev,
-            categories: tempCategories,
             priceRange: tempPriceRange,
             onlyWithDiscount: tempOnlyWithDiscount
         }))
         setFiltersOpen(false)
     }
 
-    const handleToggleCategory = (val: string) => {
-        setTempCategories(prev =>
-            prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val]
-        )
-    }
-
     const handleClearFilters = () => {
-        setTempCategories([])
+        setSelectedCategory('')
         setTempPriceRange([PRICE_MIN, PRICE_MAX])
         setTempOnlyWithDiscount(false)
         setAppliedFilters({
-            categories: [],
             priceRange: [PRICE_MIN, PRICE_MAX],
             onlyWithDiscount: false,
             sortBy: 'recent'
         })
     }
 
-    const anyFilterApplied = appliedFilters.categories.length > 0 ||
+    const anyFilterApplied = !!selectedCategory ||
         appliedFilters.priceRange[0] !== PRICE_MIN ||
         appliedFilters.priceRange[1] !== PRICE_MAX ||
         appliedFilters.onlyWithDiscount ||
@@ -439,7 +436,6 @@ export default function CatalogoPage() {
                             onClick={() => {
                                 // When opening, sync temp filters with applied ones
                                 if (!filtersOpen) {
-                                    setTempCategories(appliedFilters.categories)
                                     setTempPriceRange(appliedFilters.priceRange)
                                     setTempOnlyWithDiscount(appliedFilters.onlyWithDiscount)
                                 }
@@ -485,38 +481,6 @@ export default function CatalogoPage() {
                         boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
                     }}>
                         <div style={{ maxWidth: '700px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-
-                            {/* Categories */}
-                            <div>
-                                <p style={{
-                                    fontFamily: "'Montserrat', sans-serif",
-                                    fontSize: '0.72rem', fontWeight: 700, color: '#999',
-                                    textTransform: 'uppercase', letterSpacing: '0.07em',
-                                    marginBottom: '0.6rem',
-                                }}>Categoría (Selecciona una o más)</p>
-                                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', maxHeight: '200px', overflowY: 'auto', paddingRight: '0.5rem' }}>
-                                    {CATEGORIES.map(cat => (
-                                        <button
-                                            key={cat.value}
-                                            onClick={() => handleToggleCategory(cat.value)}
-                                            style={{
-                                                padding: '0.35rem 0.85rem',
-                                                borderRadius: '999px',
-                                                border: tempCategories.includes(cat.value) ? '2px solid #1B3022' : '1.5px solid #dedad2',
-                                                backgroundColor: tempCategories.includes(cat.value) ? '#1B3022' : 'transparent',
-                                                color: tempCategories.includes(cat.value) ? 'white' : '#333',
-                                                fontFamily: "'Montserrat', sans-serif",
-                                                fontSize: '0.78rem',
-                                                fontWeight: 600,
-                                                cursor: 'pointer',
-                                                transition: 'all 0.15s',
-                                            }}
-                                        >
-                                            {cat.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
 
                             {/* Price range slider */}
                             <div>
@@ -601,7 +565,107 @@ export default function CatalogoPage() {
             {/* Book Grid */}
             <main style={{ maxWidth: '1100px', margin: '0 auto', padding: '1.5rem 1rem' }}>
 
-                {/* Sorting bar above the grid */}
+                {/* Category pills row */}
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    marginBottom: '0.75rem',
+                }}>
+                    {/* Label fijo */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#1B3022', flexShrink: 0 }}>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M4 6h16M4 12h10M4 18h6" />
+                        </svg>
+                        <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            Categoría
+                        </span>
+                    </div>
+
+                    {/* Franja deslizable */}
+                    <div
+                        ref={catScrollRef}
+                        onMouseDown={e => {
+                            catDragging.current = true
+                            catStartX.current = e.pageX - (catScrollRef.current?.offsetLeft ?? 0)
+                            catScrollLeft.current = catScrollRef.current?.scrollLeft ?? 0
+                            if (catScrollRef.current) catScrollRef.current.style.cursor = 'grabbing'
+                        }}
+                        onMouseLeave={() => {
+                            catDragging.current = false
+                            if (catScrollRef.current) catScrollRef.current.style.cursor = 'grab'
+                        }}
+                        onMouseUp={() => {
+                            catDragging.current = false
+                            if (catScrollRef.current) catScrollRef.current.style.cursor = 'grab'
+                        }}
+                        onMouseMove={e => {
+                            if (!catDragging.current || !catScrollRef.current) return
+                            e.preventDefault()
+                            const x = e.pageX - catScrollRef.current.offsetLeft
+                            const walk = (x - catStartX.current) * 1.2
+                            catScrollRef.current.scrollLeft = catScrollLeft.current - walk
+                        }}
+                        style={{
+                            display: 'flex',
+                            gap: '0.45rem',
+                            overflowX: 'auto',
+                            paddingBottom: '4px',
+                            scrollbarWidth: 'none',
+                            msOverflowStyle: 'none',
+                            cursor: 'grab',
+                            userSelect: 'none',
+                            flex: 1,
+                        }}
+                    >
+                        {/* Pill: Todos */}
+                        <button
+                            onClick={() => setSelectedCategory('')}
+                            style={{
+                                whiteSpace: 'nowrap',
+                                padding: '0.4rem 0.9rem',
+                                borderRadius: '999px',
+                                border: selectedCategory === '' ? '2px solid #1B3022' : '1.5px solid #dedad2',
+                                backgroundColor: selectedCategory === '' ? '#1B3022' : 'white',
+                                color: selectedCategory === '' ? 'white' : '#555',
+                                fontFamily: "'Montserrat', sans-serif",
+                                fontSize: '0.78rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                transition: 'all 0.15s',
+                                boxShadow: selectedCategory === '' ? '0 3px 8px rgba(27,48,34,0.15)' : 'none',
+                                flexShrink: 0,
+                            }}
+                        >
+                            Todos
+                        </button>
+                        {CATEGORIES.map(cat => (
+                            <button
+                                key={cat.value}
+                                onClick={() => setSelectedCategory(cat.value)}
+                                style={{
+                                    whiteSpace: 'nowrap',
+                                    padding: '0.4rem 0.9rem',
+                                    borderRadius: '999px',
+                                    border: selectedCategory === cat.value ? '2px solid #1B3022' : '1.5px solid #dedad2',
+                                    backgroundColor: selectedCategory === cat.value ? '#1B3022' : 'white',
+                                    color: selectedCategory === cat.value ? 'white' : '#555',
+                                    fontFamily: "'Montserrat', sans-serif",
+                                    fontSize: '0.78rem',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.15s',
+                                    boxShadow: selectedCategory === cat.value ? '0 3px 8px rgba(27,48,34,0.15)' : 'none',
+                                    flexShrink: 0,
+                                }}
+                            >
+                                {cat.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Sorting bar */}
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
