@@ -21,6 +21,7 @@ export default function MisVentasPage() {
   const [loading, setLoading] = useState(true)
   const [books, setBooks] = useState<SellerBook[]>([])
   const [sortBy, setSortBy] = useState<'name' | 'status'>('name')
+  const [contratoUrl, setContratoUrl] = useState<string | null>(null)
 
 
 
@@ -43,6 +44,20 @@ export default function MisVentasPage() {
       } else {
         setBooks(data || [])
       }
+
+      // Fetch latest contract
+      const { data: contractData } = await supabase
+        .from('contratos_consignacion')
+        .select('pdf_url')
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (contractData) {
+        setContratoUrl(contractData.pdf_url)
+      }
+
       setLoading(false)
     }
 
@@ -313,11 +328,18 @@ export default function MisVentasPage() {
         </div>
       </div>
 
-      <div style={{ textAlign: 'center', marginTop: '4rem', paddingBottom: '2rem' }}>
-        <a href="#" style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.8rem', color: '#888', textDecoration: 'underline' }}>
-          Ver mi contrato de consignación (24 meses)
-        </a>
-      </div>
+      {contratoUrl && (
+        <div style={{ textAlign: 'center', marginTop: '4rem', paddingBottom: '2rem' }}>
+          <a 
+            href={contratoUrl} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.8rem', color: '#888', textDecoration: 'underline' }}
+          >
+            Ver mi contrato de consignación (24 meses)
+          </a>
+        </div>
+      )}
 
     </div>
   )
