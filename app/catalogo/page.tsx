@@ -323,13 +323,20 @@ export default function CatalogoPage() {
         }
     }, [appliedFilters, searchTerm, selectedCategory])
 
-    // Debounce: actualiza searchTerm 400ms después de que el usuario deja de teclear
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setSearchTerm(inputValue)
-        }, 400)
-        return () => clearTimeout(timer)
-    }, [inputValue])
+    const defaultAppliedFilters = {
+        priceRange: [PRICE_MIN, PRICE_MAX] as [number, number],
+        onlyWithDiscount: false,
+        sortBy: 'recent' as const,
+    }
+
+    /** Búsqueda solo al Enter: aplica el texto y limpia filtros para buscar en todo el catálogo. */
+    const commitSearchFromInput = () => {
+        setSearchTerm(inputValue.trim())
+        setSelectedCategory('')
+        setTempPriceRange([PRICE_MIN, PRICE_MAX])
+        setTempOnlyWithDiscount(false)
+        setAppliedFilters({ ...defaultAppliedFilters })
+    }
 
     // Guardar estado en sessionStorage cuando cambian filtros o búsqueda
     useEffect(() => {
@@ -412,9 +419,14 @@ export default function CatalogoPage() {
                         <div style={{ flex: 1, position: 'relative' }}>
                             <input
                                 type="text"
-                                placeholder="Busca por título, autor o ISBN..."
+                                placeholder="Busca por título, autor o ISBN... (Enter)"
                                 value={inputValue}
                                 onChange={e => setInputValue(e.target.value)}
+                                onKeyDown={e => {
+                                    if (e.key !== 'Enter') return
+                                    e.preventDefault()
+                                    commitSearchFromInput()
+                                }}
                                 style={{
                                     width: '100%',
                                     padding: '0.75rem 1rem 0.75rem 2.8rem',
@@ -572,15 +584,6 @@ export default function CatalogoPage() {
                     gap: '0.75rem',
                     marginBottom: '0.75rem',
                 }}>
-                    {/* Label fijo */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#1B3022', flexShrink: 0 }}>
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M4 6h16M4 12h10M4 18h6" />
-                        </svg>
-                        <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                            Categoría
-                        </span>
-                    </div>
 
                     {/* Franja deslizable */}
                     <div
@@ -676,14 +679,6 @@ export default function CatalogoPage() {
                     scrollbarWidth: 'none',
                     msOverflowStyle: 'none',
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#1B3022', flexShrink: 0 }}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M11 5L6 10L1 5" /><path d="M6 10V1" /><path d="M13 19L18 14L23 19" /><path d="M18 14V23" />
-                        </svg>
-                        <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                            Ordenar
-                        </span>
-                    </div>
                     <div style={{ display: 'flex', gap: '0.45rem' }}>
                         {[
                             { val: 'recent', label: 'Recientes' },
