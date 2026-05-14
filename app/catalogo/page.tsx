@@ -6,24 +6,24 @@ import { Book } from '@/lib/types'
 import Link from 'next/link'
 import { useCart } from '@/lib/CartContext'
 
-const CATEGORIES = [
-    { value: "Autoayuda y desarrollo personal", label: "Autoayuda y desarrollo personal" },
-    { value: "Arte y fotografía", label: "Arte y fotografía" },
-    { value: "Biografía y autobiografía", label: "Biografía y autobiografía" },
-    { value: "Cocina y hogar", label: "Cocina y hogar" },
-    { value: "Deportes", label: "Deportes" },
-    { value: "Educación", label: "Educación" },
-    { value: "Familia y relaciones", label: "Familia y relaciones" },
-    { value: "Ficción", label: "Ficción" },
-    { value: "Ficción juvenil", label: "Ficción juvenil" },
-    { value: "Filosofía y pensamiento", label: "Filosofía y pensamiento" },
-    { value: "Historia", label: "Historia" },
-    { value: "Juvenil no ficción", label: "Juvenil no ficción" },
-    { value: "Negocios y economía", label: "Negocios y economía" },
-    { value: "Otros", label: "Otros" },
-    { value: "Religión y espiritualidad", label: "Religión y espiritualidad" },
-    { value: "Salud y bienestar", label: "Salud y bienestar" },
-    { value: "Tecnología y ciencia", label: "Tecnología y ciencia" },
+const CATEGORIES: { value: string; label: string; icon: string }[] = [
+    { value: "Autoayuda y desarrollo personal", label: "Autoayuda y desarrollo personal", icon: "🌱" },
+    { value: "Arte y fotografía", label: "Arte y fotografía", icon: "🎨" },
+    { value: "Biografía y autobiografía", label: "Biografía y autobiografía", icon: "✍️" },
+    { value: "Cocina y hogar", label: "Cocina y hogar", icon: "🍳" },
+    { value: "Deportes", label: "Deportes", icon: "⚽" },
+    { value: "Educación", label: "Educación", icon: "🎓" },
+    { value: "Familia y relaciones", label: "Familia y relaciones", icon: "👨‍👩‍👧" },
+    { value: "Ficción", label: "Ficción", icon: "📖" },
+    { value: "Ficción juvenil", label: "Ficción juvenil", icon: "🧒" },
+    { value: "Filosofía y pensamiento", label: "Filosofía y pensamiento", icon: "💭" },
+    { value: "Historia", label: "Historia", icon: "🏛️" },
+    { value: "Juvenil no ficción", label: "Juvenil no ficción", icon: "📘" },
+    { value: "Negocios y economía", label: "Negocios y economía", icon: "💼" },
+    { value: "Otros", label: "Otros", icon: "📦" },
+    { value: "Religión y espiritualidad", label: "Religión y espiritualidad", icon: "✨" },
+    { value: "Salud y bienestar", label: "Salud y bienestar", icon: "💚" },
+    { value: "Tecnología y ciencia", label: "Tecnología y ciencia", icon: "🔬" },
 ]
 
 const PRICE_MIN = 0
@@ -625,6 +625,9 @@ export default function CatalogoPage() {
                         <button
                             onClick={() => setSelectedCategory('')}
                             style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.35rem',
                                 whiteSpace: 'nowrap',
                                 padding: '0.4rem 0.9rem',
                                 borderRadius: '999px',
@@ -640,6 +643,7 @@ export default function CatalogoPage() {
                                 flexShrink: 0,
                             }}
                         >
+                            <span aria-hidden style={{ fontSize: '0.95rem', lineHeight: 1 }}>📚</span>
                             Todos
                         </button>
                         {CATEGORIES.map(cat => (
@@ -647,6 +651,9 @@ export default function CatalogoPage() {
                                 key={cat.value}
                                 onClick={() => setSelectedCategory(cat.value)}
                                 style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.35rem',
                                     whiteSpace: 'nowrap',
                                     padding: '0.4rem 0.9rem',
                                     borderRadius: '999px',
@@ -662,6 +669,7 @@ export default function CatalogoPage() {
                                     flexShrink: 0,
                                 }}
                             >
+                                <span aria-hidden style={{ fontSize: '0.95rem', lineHeight: 1 }}>{cat.icon}</span>
                                 {cat.label}
                             </button>
                         ))}
