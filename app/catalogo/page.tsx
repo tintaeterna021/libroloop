@@ -329,15 +329,13 @@ export default function CatalogoPage() {
         sortBy: 'recent' as const,
     }
 
-    // Ref para omitir el debounce en el primer render (evita pisar el estado de sessionStorage)
-    const isSearchFirstRender = useRef(true)
+    // Se activa SOLO cuando el usuario escribe; nunca al restaurar desde sessionStorage.
+    // Esto evita que StrictMode (que monta efectos dos veces) borre los filtros al volver del detalle.
+    const userHasTyped = useRef(false)
 
-    // Debounce: cada vez que el usuario escribe se considera nueva intención → resetea filtros
+    // Debounce: solo resetea filtros si el usuario realmente escribió en el input
     useEffect(() => {
-        if (isSearchFirstRender.current) {
-            isSearchFirstRender.current = false
-            return
-        }
+        if (!userHasTyped.current) return
         const timer = setTimeout(() => {
             setSearchTerm(inputValue.trim())
             setSelectedCategory('')
@@ -432,7 +430,10 @@ export default function CatalogoPage() {
                                 type="text"
                                 placeholder="Busca por título, autor o ISBN..."
                                 value={inputValue}
-                                onChange={e => setInputValue(e.target.value)}
+                                onChange={e => {
+                                    userHasTyped.current = true
+                                    setInputValue(e.target.value)
+                                }}
                                 style={{
                                     width: '100%',
                                     padding: '0.75rem 2.6rem 0.75rem 2.8rem',
@@ -450,6 +451,7 @@ export default function CatalogoPage() {
                             {inputValue && (
                                 <button
                                     onClick={() => {
+                                        userHasTyped.current = false
                                         setInputValue('')
                                         setSearchTerm('')
                                     }}
