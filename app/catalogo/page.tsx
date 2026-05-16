@@ -329,14 +329,25 @@ export default function CatalogoPage() {
         sortBy: 'recent' as const,
     }
 
-    /** Búsqueda solo al Enter: aplica el texto y limpia filtros para buscar en todo el catálogo. */
-    const commitSearchFromInput = () => {
-        setSearchTerm(inputValue.trim())
-        setSelectedCategory('')
-        setTempPriceRange([PRICE_MIN, PRICE_MAX])
-        setTempOnlyWithDiscount(false)
-        setAppliedFilters({ ...defaultAppliedFilters })
-    }
+    // Ref para omitir el debounce en el primer render (evita pisar el estado de sessionStorage)
+    const isSearchFirstRender = useRef(true)
+
+    // Debounce: cada vez que el usuario escribe se considera nueva intención → resetea filtros
+    useEffect(() => {
+        if (isSearchFirstRender.current) {
+            isSearchFirstRender.current = false
+            return
+        }
+        const timer = setTimeout(() => {
+            setSearchTerm(inputValue.trim())
+            setSelectedCategory('')
+            setTempPriceRange([PRICE_MIN, PRICE_MAX])
+            setTempOnlyWithDiscount(false)
+            setAppliedFilters({ ...defaultAppliedFilters })
+        }, 400)
+        return () => clearTimeout(timer)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [inputValue])
 
     // Guardar estado en sessionStorage cuando cambian filtros o búsqueda
     useEffect(() => {
@@ -419,17 +430,12 @@ export default function CatalogoPage() {
                         <div style={{ flex: 1, position: 'relative' }}>
                             <input
                                 type="text"
-                                placeholder="Busca por título, autor o ISBN... (Enter)"
+                                placeholder="Busca por título, autor o ISBN..."
                                 value={inputValue}
                                 onChange={e => setInputValue(e.target.value)}
-                                onKeyDown={e => {
-                                    if (e.key !== 'Enter') return
-                                    e.preventDefault()
-                                    commitSearchFromInput()
-                                }}
                                 style={{
                                     width: '100%',
-                                    padding: '0.75rem 1rem 0.75rem 2.8rem',
+                                    padding: '0.75rem 2.6rem 0.75rem 2.8rem',
                                     borderRadius: '999px',
                                     border: 'none',
                                     fontFamily: "'Montserrat', sans-serif",
@@ -441,6 +447,36 @@ export default function CatalogoPage() {
                                 }}
                             />
                             <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', fontSize: '0.95rem' }}>🔍</span>
+                            {inputValue && (
+                                <button
+                                    onClick={() => {
+                                        setInputValue('')
+                                        setSearchTerm('')
+                                    }}
+                                    title="Borrar búsqueda"
+                                    style={{
+                                        position: 'absolute',
+                                        right: '0.85rem',
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        padding: '0.2rem',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        color: '#999',
+                                        fontSize: '1rem',
+                                        lineHeight: 1,
+                                        transition: 'color 0.15s',
+                                    }}
+                                    onMouseEnter={e => (e.currentTarget.style.color = '#1B3022')}
+                                    onMouseLeave={e => (e.currentTarget.style.color = '#999')}
+                                >
+                                    ✕
+                                </button>
+                            )}
                         </div>
 
                         {/* Filters toggle button */}
