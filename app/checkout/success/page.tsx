@@ -76,6 +76,7 @@ function SuccessContent() {
                 
                 <Link 
                     href="/catalogo"
+                    onClick={() => { try { sessionStorage.removeItem('libroloop_catalog_state') } catch { /* ignorar */ } }}
                     style={{
                         backgroundColor: '#1B3022',
                         color: '#F5F2E7',

@@ -76,6 +76,7 @@ export default function Home() {
           <div style={{ display: 'flex', gap: '0.85rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link
               href="/catalogo"
+              onClick={() => { try { sessionStorage.removeItem('libroloop_catalog_state') } catch { /* ignorar */ } }}
               style={{
                 backgroundColor: '#1B3022',
                 color: 'white',

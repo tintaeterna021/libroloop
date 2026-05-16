@@ -6,6 +6,12 @@ import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useCart } from '@/lib/CartContext'
 
+const CATALOG_SESSION_KEY = 'libroloop_catalog_state'
+
+const clearCatalogState = () => {
+    try { sessionStorage.removeItem(CATALOG_SESSION_KEY) } catch { /* ignorar */ }
+}
+
 export default function Navigation() {
     const pathname = usePathname()
     const { cartItems, openCart } = useCart()
@@ -75,12 +81,12 @@ export default function Navigation() {
 
     const navLinks = !isLoggedIn ? (
         <>
-            <Link href="/catalogo" style={desktopLinkStyle('/catalogo')}>Comprar</Link>
+            <Link href="/catalogo" style={desktopLinkStyle('/catalogo')} onClick={clearCatalogState}>Comprar</Link>
             <Link href="/vender"   style={desktopLinkStyle('/vender')}>Vender</Link>
         </>
     ) : (
         <>
-            <Link href="/catalogo"   style={desktopLinkStyle('/catalogo')}>Catálogo</Link>
+            <Link href="/catalogo"   style={desktopLinkStyle('/catalogo')} onClick={clearCatalogState}>Catálogo</Link>
             <Link href="/mis-compras" style={desktopLinkStyle('/mis-compras')}>Mis compras</Link>
             <Link href="/ventas"     style={desktopLinkStyle('/ventas')}>Mis ventas</Link>
         </>
@@ -88,14 +94,14 @@ export default function Navigation() {
 
     const mobileNavLinks = !isLoggedIn ? (
         <>
-            <Link href="/catalogo" style={mobileLinkStyle('/catalogo')}>Comprar</Link>
+            <Link href="/catalogo" style={mobileLinkStyle('/catalogo')} onClick={clearCatalogState}>Comprar</Link>
             <Link href="/vender"   style={mobileLinkStyle('/vender')}>Vender</Link>
             <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.1)', margin: '0.5rem 0' }} />
             <Link href="/login" style={mobileLinkStyle('/login')}>Inicio de sesión</Link>
         </>
     ) : (
         <>
-            <Link href="/catalogo"   style={mobileLinkStyle('/catalogo')}>Catálogo</Link>
+            <Link href="/catalogo"   style={mobileLinkStyle('/catalogo')} onClick={clearCatalogState}>Catálogo</Link>
             <Link href="/mis-compras" style={mobileLinkStyle('/mis-compras')}>Mis compras</Link>
             <Link href="/ventas"     style={mobileLinkStyle('/ventas')}>Mis ventas</Link>
             <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.1)', margin: '0.5rem 0' }} />
