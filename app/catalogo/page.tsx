@@ -7,23 +7,28 @@ import Link from 'next/link'
 import { useCart } from '@/lib/CartContext'
 
 const CATEGORIES: { value: string; label: string; icon: string }[] = [
-    { value: "Autoayuda y desarrollo personal", label: "Autoayuda y desarrollo personal", icon: "🌱" },
-    { value: "Arte y fotografía", label: "Arte y fotografía", icon: "🎨" },
-    { value: "Biografía y autobiografía", label: "Biografía y autobiografía", icon: "✍️" },
-    { value: "Cocina y hogar", label: "Cocina y hogar", icon: "🍳" },
-    { value: "Deportes", label: "Deportes", icon: "⚽" },
-    { value: "Educación", label: "Educación", icon: "🎓" },
-    { value: "Familia y relaciones", label: "Familia y relaciones", icon: "👨‍👩‍👧" },
     { value: "Ficción", label: "Ficción", icon: "📖" },
     { value: "Ficción juvenil", label: "Ficción juvenil", icon: "🧒" },
-    { value: "Filosofía y pensamiento", label: "Filosofía y pensamiento", icon: "💭" },
     { value: "Historia", label: "Historia", icon: "🏛️" },
-    { value: "Juvenil no ficción", label: "Juvenil no ficción", icon: "📘" },
+    { value: "Autoayuda y desarrollo personal", label: "Autoayuda y desarrollo personal", icon: "🌱" },
     { value: "Negocios y economía", label: "Negocios y economía", icon: "💼" },
-    { value: "Otros", label: "Otros", icon: "📦" },
-    { value: "Religión y espiritualidad", label: "Religión y espiritualidad", icon: "✨" },
+    { value: "Juvenil no ficción", label: "Juvenil no ficción", icon: "📘" },
+    { value: "Biografía y autobiografía", label: "Biografía y autobiografía", icon: "✍️" },
+    { value: "Familia y relaciones", label: "Familia y relaciones", icon: "👨‍👩‍👧" },
     { value: "Salud y bienestar", label: "Salud y bienestar", icon: "💚" },
-    { value: "Tecnología y ciencia", label: "Tecnología y ciencia", icon: "🔬" },
+    { value: "Viajes y transporte", label: "Viajes y transporte", icon: "🗺️" },
+    { value: "Psicología", label: "Psicología", icon: "🧠" },
+    { value: "Cocina y hogar", label: "Cocina y hogar", icon: "🍳" },
+    { value: "Religión y espiritualidad", label: "Religión y espiritualidad", icon: "✨" },
+    { value: "Filosofía y pensamiento", label: "Filosofía y pensamiento", icon: "💭" },
+    { value: "Poesía y literatura", label: "Poesía y literatura", icon: "📜" },
+    { value: "Educación", label: "Educación", icon: "🎓" },
+    { value: "Arte y fotografía", label: "Arte y fotografía", icon: "🎨" },
+    { value: "Infantil", label: "Infantil", icon: "🧸" },
+    { value: "Tecnología", label: "Tecnología", icon: "💻" },
+    { value: "Ciencia", label: "Ciencia", icon: "🔬" },
+    { value: "Deportes y recreación", label: "Deportes y recreación", icon: "⚽" },
+    { value: "Otros", label: "Otros", icon: "📦" }
 ]
 
 const PRICE_MIN = 0
