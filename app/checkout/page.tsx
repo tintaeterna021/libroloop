@@ -100,7 +100,7 @@ export default function CheckoutPage() {
             if (cp.length === 5) {
                 // Validar contra lista de códigos postales permitidos
                 if (!ALLOWED_POSTAL_CODES.has(cp)) {
-                    setCpError('Por el momento solo tenemos cobertura en CDMX y zonas aledañas, así como en el área metropolitana de Querétaro. El código postal ingresado no está dentro de nuestra área de operación.')
+                    setCpError('Por el momento solo tenemos cobertura en CDMX, así como en el área metropolitana de Querétaro. El código postal ingresado no está dentro de nuestra área de operación.')
                     setColonias([])
                     return
                 }
@@ -277,7 +277,7 @@ export default function CheckoutPage() {
                         {/* Datos de Envío */}
                         <div style={{ backgroundColor: 'white', padding: '1.5rem', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                             <h2 style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', color: '#1B3022' }}>Dirección de Envío</h2>
-                            <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: '1rem' }}>Nota: Actualmente brindamos cobertura en la Ciudad de México y zonas aledañas, así como en el área metropolitana de Querétaro.</p>
+                            <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: '1rem' }}>Nota: Actualmente brindamos cobertura en la Ciudad de México, así como en el área metropolitana de Querétaro. Si no se encuentra dentro de esta área, por favor comunícate con nosotros por WhatsApp para coordinar tu pedido.</p>
                             <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '1fr 1fr' }}>
                                 <div style={{ gridColumn: '1 / -1' }}>
                                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#555', marginBottom: '0.3rem' }}>Calle *</label>

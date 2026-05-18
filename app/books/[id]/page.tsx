@@ -79,9 +79,15 @@ export default function BookDetailPage() {
                 .eq('genre', genre)
                 .eq('status_code', 6)
                 .neq('id', currentId)
+                .limit(20)
 
             if (error) throw error
-            setRecommendations(data || [])
+            
+            // Mezclamos aleatoriamente los hasta 20 resultados y tomamos 8
+            const shuffled = (data || []).sort(() => 0.5 - Math.random())
+            const selected = shuffled.slice(0, 8)
+            
+            setRecommendations(selected)
         } catch (err) {
             console.warn('Error fetching recommendations:', err)
         }
