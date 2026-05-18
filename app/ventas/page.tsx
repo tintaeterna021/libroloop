@@ -138,12 +138,6 @@ export default function MisVentasPage() {
             🗑️ Dado de baja
           </div>
         )
-      case 12:
-        return (
-          <div style={{ backgroundColor: '#e2e3e5', color: '#6c757d', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-block' }}>
-            📦 Devuelto
-          </div>
-        )
       default:
         return (
           <div style={{ backgroundColor: '#e2e3e5', color: '#6c757d', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-block' }}>
@@ -167,8 +161,10 @@ export default function MisVentasPage() {
         return "Tu libro ya está disponible en nuestro catálogo para todos."
       case 9: return "Este libro ya tiene nuevo dueño. Tu saldo se actualizará en tu próximo corte."
       case 10: return "El pago por este ejemplar ya fue transferido a tu cuenta."
-      case 11: return "Este libro ha sido dado de baja de nuestro catálogo. ¡No te desanimes! Te invitamos a vender otros libros que tengas por ahí."
-      case 12: return "Este libro te ha sido devuelto a tu domicilio. ¡Aún así, nos encantaría que pruebes vender otros libros con nosotros!"
+      case 11:
+        return book.rejection_comment
+          ? `Este libro ha sido dado de baja de nuestro catálogo por el siguiente motivo: ${book.rejection_comment}. ¡No te desanimes! Te invitamos a vender otros libros que tengas por ahí.`
+          : `Este libro ha sido dado de baja de nuestro catálogo. ¡No te desanimes! Te invitamos a vender otros libros que tengas por ahí.`;
       default: return null
     }
   }

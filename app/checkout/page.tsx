@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useCart } from '@/lib/CartContext'
+import { ALLOWED_POSTAL_CODES } from './allowedPostalCodes'
 
 export default function CheckoutPage() {
     const router = useRouter()
@@ -97,10 +98,9 @@ export default function CheckoutPage() {
         const fetchColonias = async () => {
             const cp = form.postal_code.trim()
             if (cp.length === 5) {
-                // Validate CDMX range: 06000 – 16999
-                const cpNum = parseInt(cp, 10)
-                if (cpNum < 1000 || cpNum > 16999) {
-                    setCpError('Por el momento solo hacemos entregas dentro de la CDMX. El código postal ingresado no pertenece a la CDMX.')
+                // Validar contra lista de códigos postales permitidos
+                if (!ALLOWED_POSTAL_CODES.has(cp)) {
+                    setCpError('Por el momento solo tenemos cobertura en CDMX y zonas aledañas, así como en el área metropolitana de Querétaro. El código postal ingresado no está dentro de nuestra área de operación.')
                     setColonias([])
                     return
                 }
@@ -277,7 +277,7 @@ export default function CheckoutPage() {
                         {/* Datos de Envío */}
                         <div style={{ backgroundColor: 'white', padding: '1.5rem', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                             <h2 style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', color: '#1B3022' }}>Dirección de Envío</h2>
-                            <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: '1rem' }}>Nota: Recuerda que por el momento nuestras entregas son exclusivas en la CDMX.</p>
+                            <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: '1rem' }}>Nota: Actualmente brindamos cobertura en la Ciudad de México y zonas aledañas, así como en el área metropolitana de Querétaro.</p>
                             <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '1fr 1fr' }}>
                                 <div style={{ gridColumn: '1 / -1' }}>
                                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#555', marginBottom: '0.3rem' }}>Calle *</label>
@@ -342,7 +342,7 @@ export default function CheckoutPage() {
                                 <strong>${subtotal.toLocaleString('es-MX')}</strong>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: "'Montserrat', sans-serif", fontSize: '0.95rem', color: '#555' }}>
-                                <span>Envío (Solo CDMX):</span>
+                                <span>Envío (Zonas de Cobertura):</span>
                                 <strong>${shipping_cost.toLocaleString('es-MX')}</strong>
                             </div>
                             {shipping_cost === 0 && (
