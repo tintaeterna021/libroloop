@@ -70,7 +70,7 @@ export default function SiteFooter() {
                         </li>
                         <li>
                             <a
-                                href="https://www.instagram.com/libro_loop"
+                                href="https://www.instagram.com/libroloopmx"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style={{ color: '#ccc', textDecoration: 'none', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem', transition: 'color 0.2s' }}
