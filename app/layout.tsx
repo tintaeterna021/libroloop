@@ -6,6 +6,7 @@ import SiteFooter from "@/components/SiteFooter";
 import { CartProvider } from "@/lib/CartContext";
 import CartDrawer from "@/components/CartDrawer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "Libroloop - Compra de Libros",
@@ -37,6 +38,7 @@ export default function RootLayout({
           </div>
           <SiteFooter />
         </CartProvider>
+        <Analytics />
         {/* Meta Pixel Code */}
         <Script id="meta-pixel" strategy="afterInteractive">
           {`
