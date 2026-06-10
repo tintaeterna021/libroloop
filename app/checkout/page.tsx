@@ -1,14 +1,17 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useCart } from '@/lib/CartContext'
 import { ALLOWED_POSTAL_CODES } from './allowedPostalCodes'
+import { useMetaEvent } from '@/lib/useMetaEvent'
 
 export default function CheckoutPage() {
     const router = useRouter()
     const { cartItems, clearCart } = useCart()
+    const { trackEvent } = useMetaEvent()
+    const initiateCheckoutFired = useRef(false)
     const [loading, setLoading] = useState(true)
     const [submitting, setSubmitting] = useState(false)
     const [isSuccess, setIsSuccess] = useState(false)
@@ -41,6 +44,20 @@ export default function CheckoutPage() {
             router.push('/catalogo')
         }
     }, [cartItems, loading, router, isSuccess])
+
+    // Fire InitiateCheckout once when the page is ready and has items
+    useEffect(() => {
+        if (!loading && cartItems.length > 0 && !initiateCheckoutFired.current) {
+            initiateCheckoutFired.current = true
+            const subtotalVal = cartItems.reduce((acc, item) => acc + item.sale_price, 0)
+            trackEvent('InitiateCheckout', {
+                value: subtotalVal,
+                currency: 'MXN',
+                numItems: cartItems.length,
+                contentIds: cartItems.map(i => i.id),
+            })
+        }
+    }, [loading, cartItems, trackEvent])
 
     useEffect(() => {
         const initCheckout = async () => {
@@ -228,6 +245,20 @@ export default function CheckoutPage() {
 
             // 5. Success
             setIsSuccess(true)
+
+            // Purchase — fired BEFORE clearCart so we still have item data
+            await trackEvent('Purchase', {
+                orderId: String(order.order_number),
+                value: total_with_shipping,
+                currency: 'MXN',
+                numItems: cartItems.length,
+                contentIds: cartItems.map(i => i.id),
+                email: form.email,
+                phone: form.phone,
+                firstName: form.name.split(' ')[0],
+                lastName: form.name.split(' ').slice(1).join(' '),
+            })
+
             clearCart()
             router.push(`/checkout/success?order=${order.order_number}`)
 

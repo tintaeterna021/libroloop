@@ -6,9 +6,11 @@ import { useParams } from 'next/navigation'
 import { Book } from '@/lib/types'
 import Link from 'next/link'
 import { useCart } from '@/lib/CartContext'
+import { useMetaEvent } from '@/lib/useMetaEvent'
 
 export default function BookDetailPage() {
     const { addToCart, openCart } = useCart()
+    const { trackEvent } = useMetaEvent()
     const params = useParams()
     const [book, setBook] = useState<Book | null>(null)
     const [recommendations, setRecommendations] = useState<Book[]>([])
@@ -63,6 +65,16 @@ export default function BookDetailPage() {
             setBook(data)
             if (data?.genre) {
                 fetchRecommendations(data.id, data.genre)
+            }
+            // ViewContent — fired once when the book data is ready
+            if (data) {
+                trackEvent('ViewContent', {
+                    contentIds: [data.id],
+                    contentType: 'product',
+                    contentName: data.title,
+                    value: Number(data.sale_price),
+                    currency: 'MXN',
+                })
             }
         } catch (err) {
             console.error(err)
@@ -250,6 +262,13 @@ export default function BookDetailPage() {
                                 onClick={() => {
                                     addToCart(book);
                                     openCart();
+                                    trackEvent('AddToCart', {
+                                        contentIds: [book.id],
+                                        contentName: book.title,
+                                        value: Number(book.sale_price),
+                                        currency: 'MXN',
+                                        numItems: 1,
+                                    });
                                 }}
                                 style={{
                                     width: '100%',
