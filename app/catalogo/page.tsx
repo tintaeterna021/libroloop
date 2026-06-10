@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Book } from '@/lib/types'
+import { BookCard } from '@/lib/types'
 import Link from 'next/link'
 import { useCart } from '@/lib/CartContext'
 
@@ -182,7 +182,7 @@ const CATALOG_SESSION_KEY = 'libroloop_catalog_state'
 
 export default function CatalogoPage() {
     const { addToCart, openCart } = useCart()
-    const [books, setBooks] = useState<Book[]>([])
+    const [books, setBooks] = useState<BookCard[]>([])
     const [loading, setLoading] = useState(true)
     const [loadingMore, setLoadingMore] = useState(false)
     const [hasMore, setHasMore] = useState(true)
@@ -247,7 +247,10 @@ export default function CatalogoPage() {
         if (reset) setLoading(true); else setLoadingMore(true)
 
         try {
-            let query = supabase.from('books').select('*').eq('status_code', 6)
+            let query = supabase
+                .from('books')
+                .select('id, title, author, sale_price, original_price, extra_discount_percent, publish_front_image_url')
+                .eq('status_code', 6)
 
             // Category single-select filter
             if (selectedCategory) {

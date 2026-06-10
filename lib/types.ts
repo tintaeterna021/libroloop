@@ -77,6 +77,22 @@ export interface Book {
     created_at: string
 }
 
+/**
+ * Subset of Book used in catalog and recommendation cards.
+ * Only the fields fetched by the optimised Supabase select queries.
+ */
+export type BookCard = Pick<
+    Book,
+    | 'id'
+    | 'title'
+    | 'author'
+    | 'sale_price'
+    | 'original_price'
+    | 'extra_discount_percent'
+    | 'publish_front_image_url'
+    | 'genre'
+>
+
 // Helper type guards
 export function hasRole(profile: Profile | null, role: UserRole): boolean {
     return profile?.roles?.includes(role) ?? false

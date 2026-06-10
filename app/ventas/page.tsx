@@ -35,7 +35,7 @@ export default function MisVentasPage() {
 
       const { data, error } = await supabase
         .from('books')
-        .select('*')
+        .select('id, title, author, original_front_image_url, publish_front_image_url, status_code, seller_payout_amount, rejection_comment')
         .eq('user_id', session.user.id)
         .order('created_at', { ascending: false })
 

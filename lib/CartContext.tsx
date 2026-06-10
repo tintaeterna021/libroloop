@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { Book } from '@/lib/types'
+import { BookCard } from '@/lib/types'
 
 export interface CartItem {
     id: string
@@ -15,7 +15,7 @@ export interface CartItem {
 interface CartContextType {
     cartItems: CartItem[]
     isCartOpen: boolean
-    addToCart: (book: Book) => void
+    addToCart: (book: BookCard) => void
     removeFromCart: (bookId: string) => void
     clearCart: () => void
     toggleCart: () => void
@@ -50,7 +50,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         }
     }, [cartItems, isInitialized])
 
-    const addToCart = (book: Book) => {
+    const addToCart = (book: BookCard) => {
         setCartItems(prev => {
             // Evitar duplicados
             if (prev.some(item => item.id === book.id)) {

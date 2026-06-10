@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useParams } from 'next/navigation'
-import { Book } from '@/lib/types'
+import { Book, BookCard } from '@/lib/types'
 import Link from 'next/link'
 import { useCart } from '@/lib/CartContext'
 import { useMetaEvent } from '@/lib/useMetaEvent'
@@ -13,7 +13,7 @@ export default function BookDetailPage() {
     const { trackEvent } = useMetaEvent()
     const params = useParams()
     const [book, setBook] = useState<Book | null>(null)
-    const [recommendations, setRecommendations] = useState<Book[]>([])
+    const [recommendations, setRecommendations] = useState<BookCard[]>([])
     const [loading, setLoading] = useState(true)
     type ImageKey = 'publish_front' | 'publish_back' | 'original_front' | 'original_back'
     const [activeImage, setActiveImage] = useState<ImageKey>('publish_front')
@@ -87,7 +87,7 @@ export default function BookDetailPage() {
         try {
             const { data, error } = await supabase
                 .from('books')
-                .select('*')
+                .select('id, title, author, sale_price, original_price, extra_discount_percent, publish_front_image_url, genre')
                 .eq('genre', genre)
                 .eq('status_code', 6)
                 .neq('id', currentId)

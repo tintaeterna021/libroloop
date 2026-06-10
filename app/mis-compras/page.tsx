@@ -42,7 +42,7 @@ export default function MisComprasPage() {
 
       const { data, error } = await supabase
         .from('orders')
-        .select('*')
+        .select('id, order_number, total, shipping_cost, total_with_shipping, status_code, created_at, preparation_at, delivered_at, payment_method')
         .eq('user_id', session.user.id)
         .order('created_at', { ascending: false })
 
